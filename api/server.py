@@ -80,12 +80,16 @@ async def root():
 @app.post("/api/user")
 async def api_user(request: Request):
     data = await request.json()
-    init_data = data.get("init_data", "")
-    user_data = extract_user(init_data)
+    user_id = data.get("user_id")
+    user_data = data
 
-    user_id = user_data.get("id")
     if not user_id:
-        raise HTTPException(status_code=400, detail="Invalid user")
+        # fallback: try telegram init_data
+        init_data = data.get("init_data", "")
+        user_data = extract_user(init_data)
+        user_id = user_data.get("id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="No user identified")
 
     async with async_session() as session:
         user, is_new = await get_or_create_user(

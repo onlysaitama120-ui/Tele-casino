@@ -29,6 +29,7 @@ async function api(endpoint, data = {}) {
 
 // Initialize user
 async function initUser() {
+try {
     // Try to get user from Telegram
     let userData = null;
     if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
@@ -58,7 +59,6 @@ async function initUser() {
     document.getElementById('profile-coins').textContent = userCoins.toLocaleString();
     document.getElementById('profile-items').textContent = result.items || 0;
     document.getElementById('profile-refcode').textContent = result.referral_code || '-';
-    document.getElementById('profile-level').textContent = result.level || 1;
 
     // Hide loading
     document.getElementById('loading').classList.add('hidden');
@@ -230,4 +230,4 @@ function shareReferral() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initUser);
+document.addEventListener('DOMContentLoaded', () => initUser().catch(e => { console.error(e); document.getElementById('loading').classList.add('hidden'); }));
