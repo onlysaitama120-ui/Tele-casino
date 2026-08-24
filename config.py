@@ -1,130 +1,113 @@
 #!/usr/bin/env python3
 """
-Casino Bot - Professional Configuration.
-Reads secrets from environment variables (NEVER hardcode tokens!).
-Set these in Render dashboard / your shell:
-  BOT_TOKEN, BOT_USERNAME, WEBAPP_URL, ADMIN_IDS
+GIFT RUSH - NFT Collectible Game Configuration.
+Set secrets via environment variables (never hardcode).
 """
 
 import os
 
 # ============================================================
-# BOT CONFIGURATION (from environment - safe for public repos)
+# BOT
 # ============================================================
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "")  # Set in Render dashboard!
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 BOT_USERNAME = os.environ.get("BOT_USERNAME", "MyCasinoBotx_bot")
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://tele-casino.onrender.com")
 ADMIN_IDS = [int(x) for x in os.environ.get("ADMIN_IDS", "0").split(",") if x.strip()]
 
-# ============================================================
-# DATABASE
-# ============================================================
-
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///db/casino.db")
 
 # ============================================================
-# PAYMENTS
+# TON DEPOSITS  (real money entry point)
 # ============================================================
 
-STARS_ENABLED = True
-NOWPAYMENTS_API_KEY = os.environ.get("NOWPAYMENTS_API_KEY", "")
-NOWPAYMENTS_IPN_SECRET = os.environ.get("NOWPAYMENTS_IPN_SECRET", "")
+TON_WALLET = os.environ.get("TON_WALLET", "UQYourMerchantTonWalletAddressHere")
+TONCENTER_API = "https://toncenter.com/api/v2"
+GEMS_PER_TON = 1000          # 1 TON = 1,000 gems
+DEPOSIT_MIN = 0.1            # minimum TON credited
 
 # ============================================================
-# GAME ECONOMY
+# ECONOMY
 # ============================================================
 
-INITIAL_COINS = 1000
-DAILY_REWARD = 100
-DAILY_STREAK_BONUS = 50
+INITIAL_GEMS = 300
+DAILY_REWARD = 50
+DAILY_STREAK_BONUS = 25
 MAX_STREAK = 10
-REFERRAL_BONUS = 200
-REFERRAL_PREMIUM = 500
+REFERRAL_BONUS = 150
+MARKET_FEE_PCT = 5           # platform cut on trades
 
 # ============================================================
-# CASES
+# MYSTERY BOXES  (chance = %, total 100 per box)
 # ============================================================
 
-CASES = {
-    "bronze": {
-        "name": "Bronze Case", "price": 100, "emoji": "📦", "color": "#CD7F32",
+BOXES = {
+    "starter": {
+        "name": "Starter Box", "price": 250, "emoji": "🎁", "color": "#7c5cff",
         "items": [
-            {"name": "Bronze Coin", "rarity": "common", "chance": 50, "value": 15, "emoji": "🪙"},
-            {"name": "Copper Ring", "rarity": "common", "chance": 25, "value": 30, "emoji": "💍"},
-            {"name": "Iron Dagger", "rarity": "uncommon", "chance": 15, "value": 75, "emoji": "🗡️"},
-            {"name": "Silver Pendant", "rarity": "rare", "chance": 8, "value": 200, "emoji": "📿"},
-            {"name": "Golden Token", "rarity": "epic", "chance": 2, "value": 500, "emoji": "🏅"},
+            {"name": "Sticker Pack",      "rarity": "common",    "chance": 55, "value": 80,    "emoji": "🩷"},
+            {"name": "Mini Plush",        "rarity": "common",    "chance": 25, "value": 160,   "emoji": "🧸"},
+            {"name": "Neon Signet",       "rarity": "rare",      "chance": 14, "value": 450,   "emoji": "💍"},
+            {"name": "Astral Shard",      "rarity": "epic",      "chance": 5,  "value": 1400,  "emoji": "🔮"},
+            {"name": "Golden Heart",      "rarity": "legendary", "chance": 1,  "value": 6000,  "emoji": "💛"},
         ]
     },
-    "silver": {
-        "name": "Silver Case", "price": 500, "emoji": "🎁", "color": "#C0C0C0",
+    "pro": {
+        "name": "Pro Box", "price": 1200, "emoji": "🎀", "color": "#38bdf8",
         "items": [
-            {"name": "Silver Bar", "rarity": "common", "chance": 30, "value": 60, "emoji": "🪙"},
-            {"name": "Crystal Shard", "rarity": "uncommon", "chance": 30, "value": 150, "emoji": "💠"},
-            {"name": "Ruby Gem", "rarity": "rare", "chance": 25, "value": 500, "emoji": "💎"},
-            {"name": "Emerald Crown", "rarity": "epic", "chance": 12, "value": 1500, "emoji": "👑"},
-            {"name": "Dragon Scale", "rarity": "legendary", "chance": 3, "value": 5000, "emoji": "🐉"},
+            {"name": "Candy Cane",        "rarity": "common",    "chance": 40, "value": 350,   "emoji": "🍬"},
+            {"name": "Snow Globe",        "rarity": "uncommon",  "chance": 30, "value": 700,   "emoji": "🌐"},
+            {"name": "Signet Ring",       "rarity": "rare",      "chance": 20, "value": 2000,  "emoji": "💎"},
+            {"name": "Eternal Rose",      "rarity": "epic",      "chance": 8,  "value": 6500,  "emoji": "🌹"},
+            {"name": "Durov Cap",         "rarity": "legendary", "chance": 2,  "value": 30000, "emoji": "🧢"},
         ]
     },
-    "gold": {
-        "name": "Gold Case", "price": 2000, "emoji": "🏆", "color": "#FFD700",
+    "elite": {
+        "name": "Elite Box", "price": 6000, "emoji": "🗃️", "color": "#f472b6",
         "items": [
-            {"name": "Gold Ingot", "rarity": "uncommon", "chance": 30, "value": 250, "emoji": "🪙"},
-            {"name": "Sapphire Ring", "rarity": "rare", "chance": 30, "value": 800, "emoji": "💍"},
-            {"name": "Phoenix Feather", "rarity": "epic", "chance": 25, "value": 3000, "emoji": "🔥"},
-            {"name": "Unicorn Horn", "rarity": "legendary", "chance": 12, "value": 10000, "emoji": "🦄"},
-            {"name": "Cosmic Artifact", "rarity": "mythic", "chance": 3, "value": 50000, "emoji": "🌌"},
+            {"name": "Crystal Ball",      "rarity": "uncommon",  "chance": 35, "value": 1800,  "emoji": "🔮"},
+            {"name": "Eternal Rose",      "rarity": "rare",      "chance": 30, "value": 4000,  "emoji": "🌹"},
+            {"name": "Plush Pepe Mini",   "rarity": "epic",      "chance": 22, "value": 12000, "emoji": "🐸"},
+            {"name": "Swiss Watch",       "rarity": "legendary", "chance": 10, "value": 45000, "emoji": "⌚"},
+            {"name": "Plush Pepe (NFT)",  "rarity": "mythic",    "chance": 3,  "value": 250000,"emoji": "🐸👑"},
         ]
     },
-    "diamond": {
-        "name": "Diamond Case", "price": 10000, "emoji": "💎", "color": "#B9F2FF",
+    "legend": {
+        "name": "Legend Box", "price": 25000, "emoji": "🏆", "color": "#ffd54a",
         "items": [
-            {"name": "Diamond Shard", "rarity": "rare", "chance": 35, "value": 1000, "emoji": "💎"},
-            {"name": "Obsidian Blade", "rarity": "epic", "chance": 30, "value": 4000, "emoji": "⚔️"},
-            {"name": "Leviathan Eye", "rarity": "legendary", "chance": 25, "value": 15000, "emoji": "👁️"},
-            {"name": "Void Walker", "rarity": "mythic", "chance": 8, "value": 75000, "emoji": "🌀"},
-            {"name": "Eternal Core", "rarity": "divine", "chance": 2, "value": 200000, "emoji": "✨"},
+            {"name": "Swiss Watch",       "rarity": "epic",      "chance": 40, "value": 20000, "emoji": "⌚"},
+            {"name": "Plush Pepe (NFT)",  "rarity": "legendary", "chance": 40, "value": 90000, "emoji": "🐸"},
+            {"name": "Durov Cap (NFT)",   "rarity": "mythic",    "chance": 15, "value": 350000,"emoji": "🧢"},
+            {"name": "Precious Peach",    "rarity": "divine",    "chance": 5,  "value": 1000000,"emoji": "🍑"},
         ]
     },
 }
 
-ROULETTE = {
-    "min_bet": 50, "max_bet": 50000,
-    "colors": {
-        "red": {"multiplier": 2, "chance": 48.6, "emoji": "🔴"},
-        "black": {"multiplier": 2, "chance": 48.6, "emoji": "⚫"},
-        "green": {"multiplier": 14, "chance": 2.8, "emoji": "🟢"},
-    }
-}
-
-SLOTS = {
-    "min_bet": 25, "max_bet": 10000,
-    "symbols": ["🍒", "🍋", "🍊", "🍇", "💎", "7️⃣", "🎰"],
-    "payouts": {
-        "🍒🍒🍒": 5, "🍋🍋🍋": 8, "🍊🍊🍊": 10, "🍇🍇🍇": 15,
-        "💎💎💎": 25, "7️⃣7️⃣7️⃣": 50, "🎰🎰🎰": 100,
-        "🍒🍒": 2, "💎💎": 4, "7️⃣7️⃣": 8,
-    }
-}
-
-BREEDING = {
-    "enabled": True, "cost": 500, "cooldown_hours": 24,
-    "combos": {
-        ("common", "common"): {"result": "uncommon", "chance": 70},
-        ("uncommon", "uncommon"): {"result": "rare", "chance": 50},
-        ("rare", "rare"): {"result": "epic", "chance": 35},
-        ("epic", "epic"): {"result": "legendary", "chance": 20},
-        ("legendary", "legendary"): {"result": "mythic", "chance": 10},
-        ("mythic", "mythic"): {"result": "divine", "chance": 5},
-    }
-}
-
-LEADERBOARD = {"update_interval": 300, "top_n": 10}
-
+# Rarity order + colors
+RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary", "mythic", "divine"]
 RARITY_COLORS = {
-    "common": "#888888", "uncommon": "#44ff44", "rare": "#4488ff",
+    "common": "#8b93b5", "uncommon": "#44dd77", "rare": "#4488ff",
     "epic": "#aa44ff", "legendary": "#ffaa00", "mythic": "#ff4444",
     "divine": "#ffd700",
 }
-RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary", "mythic", "divine"]
+
+# ============================================================
+# FUSION (breeding)
+# ============================================================
+
+FUSION = {
+    "enabled": True, "cost": 300, "cooldown_hours": 24,
+    "combos": {
+        ("common", "common"):       {"result": "uncommon",  "chance": 70},
+        ("uncommon", "uncommon"):   {"result": "rare",      "chance": 50},
+        ("rare", "rare"):           {"result": "epic",      "chance": 35},
+        ("epic", "epic"):           {"result": "legendary", "chance": 20},
+        ("legendary", "legendary"): {"result": "mythic",    "chance": 10},
+        ("mythic", "mythic"):       {"result": "divine",    "chance": 5},
+    }
+}
+
+LEADERBOARD = {"top_n": 10}
+
+# compat alias for case engine
+CASES = BOXES

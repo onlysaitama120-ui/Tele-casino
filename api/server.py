@@ -22,6 +22,10 @@ from api import (
     get_leaderboard, send_gift
 )
 import config
+from api.deposits import (
+    get_deposit_info, check_deposits,
+    request_withdrawal, list_withdrawals, complete_withdrawal,
+)
 
 app = FastAPI(title="Casino Bot API", version="2.0")
 
@@ -496,6 +500,63 @@ async def api_admin_give(request: Request):
 
         return {"success": True, "new_balance": wallet.coins}
 
+
+
+# ============================================================
+# DEPOSITS (TON)
+# ============================================================
+
+@app.post("/api/deposit/info")
+async def api_deposit_info(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+    async with async_session() as session:
+        return await get_deposit_info(session, user_id)
+
+
+@app.post("/api/deposit/check")
+async def api_deposit_check(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+    async with async_session() as session:
+        result = await check_deposits(session, user_id)
+        return result
+
+
+# ============================================================
+# WITHDRAWALS
+# ============================================================
+
+@app.post("/api/withdraw")
+async def api_withdraw(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    item_id = data.get("item_id")
+    if not user_id or not item_id:
+        raise HTTPException(status_code=400, detail="Missing parameters")
+    async with async_session() as session:
+        return await request_withdrawal(session, user_id, item_id)
+
+
+@app.get("/api/withdrawals")
+async def api_withdrawals():
+    async with async_session() as session:
+        return {"requests": await list_withdrawals(session)}
+
+
+@app.post("/api/withdrawals/complete")
+async def api_withdrawals_complete(request: Request):
+    data = await request.json()
+    admin_id = data.get("admin_id")
+    request_id = data.get("request_id")
+    if admin_id not in config.ADMIN_IDS:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    async with async_session() as session:
+        return await complete_withdrawal(session, request_id)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="miniapp/static"), name="static")
