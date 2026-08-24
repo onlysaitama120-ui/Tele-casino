@@ -1,0 +1,9 @@
+# Git ignore - keeps secrets & junk out of the repo
+__pycache__/
+*.pyc
+db/casino.db
+*.db
+ig_session.json
+.env
+*.log
+chrome_profile/

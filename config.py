@@ -1,57 +1,54 @@
-import os
 #!/usr/bin/env python3
 """
 Casino Bot - Professional Configuration.
-All game settings, payments, and admin config.
+Reads secrets from environment variables (NEVER hardcode tokens!).
+Set these in Render dashboard / your shell:
+  BOT_TOKEN, BOT_USERNAME, WEBAPP_URL, ADMIN_IDS
 """
 
+import os
+
 # ============================================================
-# BOT CONFIGURATION
+# BOT CONFIGURATION (from environment - safe for public repos)
 # ============================================================
 
-BOT_TOKEN = "8944289947:AAEDO9RcrZWr-KdOFy5ypC7E3H43CUtuRMY"  # Get from @BotFather
-BOT_USERNAME = "MyCasinoBotx_bot"
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://tele-casino.onrender.com")  # Deployed mini app URL
-ADMIN_IDS = [123456789]  # Your Telegram user ID(s)
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "")  # Set in Render dashboard!
+BOT_USERNAME = os.environ.get("BOT_USERNAME", "MyCasinoBotx_bot")
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://tele-casino.onrender.com")
+ADMIN_IDS = [int(x) for x in os.environ.get("ADMIN_IDS", "0").split(",") if x.strip()]
 
 # ============================================================
 # DATABASE
 # ============================================================
 
-DATABASE_URL = "sqlite+aiosqlite:///db/casino.db"
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///db/casino.db")
 
 # ============================================================
-# PAYMENT CONFIGURATION
+# PAYMENTS
 # ============================================================
 
-# Telegram Stars (built-in Telegram payments)
 STARS_ENABLED = True
-
-# Crypto payments (NOWPayments)
-NOWPAYMENTS_API_KEY = "YOUR_KEY"
-NOWPAYMENTS_IPN_SECRET = "YOUR_SECRET"
+NOWPAYMENTS_API_KEY = os.environ.get("NOWPAYMENTS_API_KEY", "")
+NOWPAYMENTS_IPN_SECRET = os.environ.get("NOWPAYMENTS_IPN_SECRET", "")
 
 # ============================================================
 # GAME ECONOMY
 # ============================================================
 
-INITIAL_COINS = 1000          # New user bonus
-DAILY_REWARD = 100            # Daily login reward
-DAILY_STREAK_BONUS = 50       # Extra per consecutive day (max 500)
-MAX_STREAK = 10               # Days for max streak bonus
-REFERRAL_BONUS = 200          # Coins per referral
-REFERRAL_PREMIUM = 500        # Coins if referral deposits
+INITIAL_COINS = 1000
+DAILY_REWARD = 100
+DAILY_STREAK_BONUS = 50
+MAX_STREAK = 10
+REFERRAL_BONUS = 200
+REFERRAL_PREMIUM = 500
 
 # ============================================================
-# CASE SYSTEM
+# CASES
 # ============================================================
 
 CASES = {
     "bronze": {
-        "name": "Bronze Case",
-        "price": 100,
-        "emoji": "📦",
-        "color": "#CD7F32",
+        "name": "Bronze Case", "price": 100, "emoji": "📦", "color": "#CD7F32",
         "items": [
             {"name": "Bronze Coin", "rarity": "common", "chance": 50, "value": 15, "emoji": "🪙"},
             {"name": "Copper Ring", "rarity": "common", "chance": 25, "value": 30, "emoji": "💍"},
@@ -61,10 +58,7 @@ CASES = {
         ]
     },
     "silver": {
-        "name": "Silver Case",
-        "price": 500,
-        "emoji": "🎁",
-        "color": "#C0C0C0",
+        "name": "Silver Case", "price": 500, "emoji": "🎁", "color": "#C0C0C0",
         "items": [
             {"name": "Silver Bar", "rarity": "common", "chance": 30, "value": 60, "emoji": "🪙"},
             {"name": "Crystal Shard", "rarity": "uncommon", "chance": 30, "value": 150, "emoji": "💠"},
@@ -74,10 +68,7 @@ CASES = {
         ]
     },
     "gold": {
-        "name": "Gold Case",
-        "price": 2000,
-        "emoji": "🏆",
-        "color": "#FFD700",
+        "name": "Gold Case", "price": 2000, "emoji": "🏆", "color": "#FFD700",
         "items": [
             {"name": "Gold Ingot", "rarity": "uncommon", "chance": 30, "value": 250, "emoji": "🪙"},
             {"name": "Sapphire Ring", "rarity": "rare", "chance": 30, "value": 800, "emoji": "💍"},
@@ -87,10 +78,7 @@ CASES = {
         ]
     },
     "diamond": {
-        "name": "Diamond Case",
-        "price": 10000,
-        "emoji": "💎",
-        "color": "#B9F2FF",
+        "name": "Diamond Case", "price": 10000, "emoji": "💎", "color": "#B9F2FF",
         "items": [
             {"name": "Diamond Shard", "rarity": "rare", "chance": 35, "value": 1000, "emoji": "💎"},
             {"name": "Obsidian Blade", "rarity": "epic", "chance": 30, "value": 4000, "emoji": "⚔️"},
@@ -101,13 +89,8 @@ CASES = {
     },
 }
 
-# ============================================================
-# ROULETTE
-# ============================================================
-
 ROULETTE = {
-    "min_bet": 50,
-    "max_bet": 50000,
+    "min_bet": 50, "max_bet": 50000,
     "colors": {
         "red": {"multiplier": 2, "chance": 48.6, "emoji": "🔴"},
         "black": {"multiplier": 2, "chance": 48.6, "emoji": "⚫"},
@@ -115,36 +98,18 @@ ROULETTE = {
     }
 }
 
-# ============================================================
-# SLOTS MACHINE
-# ============================================================
-
 SLOTS = {
-    "min_bet": 25,
-    "max_bet": 10000,
+    "min_bet": 25, "max_bet": 10000,
     "symbols": ["🍒", "🍋", "🍊", "🍇", "💎", "7️⃣", "🎰"],
     "payouts": {
-        "🍒🍒🍒": 5,
-        "🍋🍋🍋": 8,
-        "🍊🍊🍊": 10,
-        "🍇🍇🍇": 15,
-        "💎💎💎": 25,
-        "7️⃣7️⃣7️⃣": 50,
-        "🎰🎰🎰": 100,
-        "🍒🍒": 2,
-        "💎💎": 4,
-        "7️⃣7️⃣": 8,
+        "🍒🍒🍒": 5, "🍋🍋🍋": 8, "🍊🍊🍊": 10, "🍇🍇🍇": 15,
+        "💎💎💎": 25, "7️⃣7️⃣7️⃣": 50, "🎰🎰🎰": 100,
+        "🍒🍒": 2, "💎💎": 4, "7️⃣7️⃣": 8,
     }
 }
 
-# ============================================================
-# BREEDING SYSTEM
-# ============================================================
-
 BREEDING = {
-    "enabled": True,
-    "cost": 500,
-    "cooldown_hours": 24,
+    "enabled": True, "cost": 500, "cooldown_hours": 24,
     "combos": {
         ("common", "common"): {"result": "uncommon", "chance": 70},
         ("uncommon", "uncommon"): {"result": "rare", "chance": 50},
@@ -155,27 +120,11 @@ BREEDING = {
     }
 }
 
-# ============================================================
-# LEADERBOARD
-# ============================================================
-
-LEADERBOARD = {
-    "update_interval": 300,  # seconds
-    "top_n": 10,
-}
-
-# ============================================================
-# RARITY COLORS (for UI)
-# ============================================================
+LEADERBOARD = {"update_interval": 300, "top_n": 10}
 
 RARITY_COLORS = {
-    "common": "#888888",
-    "uncommon": "#44ff44",
-    "rare": "#4488ff",
-    "epic": "#aa44ff",
-    "legendary": "#ffaa00",
-    "mythic": "#ff4444",
+    "common": "#888888", "uncommon": "#44ff44", "rare": "#4488ff",
+    "epic": "#aa44ff", "legendary": "#ffaa00", "mythic": "#ff4444",
     "divine": "#ffd700",
 }
-
 RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary", "mythic", "divine"]
