@@ -263,84 +263,68 @@ def roll_case_item(case):
 # ROULETTE
 # ============================================================
 
-async def spin_roulette(session: AsyncSession, user_id: int, bet: int, color: str):
-    """Spin roulette with provably fair system."""
-    try:
-        return await _spin_roulette_inner(session, user_id, bet, color)
-    except Exception as e:
-        import traceback
-        return {"success": False, "debug": traceback.format_exc()[-600:]}
+async def spin_roulette(session: AsyncSession, user_id: int, bet, color: str):
+    """Spin roulette - hardened."""
     if color not in config.ROULETTE["colors"]:
         return {"success": False, "message": "Invalid color"}
 
     try:
         bet = int(bet)
     except Exception:
-        return {"success": False, "message": "Invalid bet"}
-    if bet <= 0:
-        return {"success": False, "message": "Invalid bet"}
-    try:
-        bet = int(bet)
-    except Exception:
-        return {"success": False, "message": "Invalid bet"}
+        bet = -1
     if bet <= 0:
         return {"success": False, "message": "Invalid bet"}
     if bet < config.ROULETTE["min_bet"] or bet > config.ROULETTE["max_bet"]:
-        return {"success": False, "message": f"Bet must be {config.ROULETTE['min_bet']}-{config.ROULETTE['max_bet']}"}
+        return {"success": False, "message": "Bet out of range"}
 
     wallet = await get_wallet(session, user_id)
     if not wallet or wallet.coins < bet:
-        return {"success": False, "message": "Not enough coins", "balance": wallet.coins if wallet else 0}
+        return {"success": False, "message": "Not enough coins",
+                "balance": wallet.coins if wallet else 0}
 
     # Deduct bet
     wallet.coins -= bet
-    tx = Transaction(
+    session.add(Transaction(
         user_id=user_id,
         type="roulette_bet",
         amount=-bet,
         balance_after=wallet.coins,
-        description=f"Roulette bet ({color})"
-    )
-    session.add(tx)
+        description=f"Roulette bet ({color})",
+    ))
 
-    # Generate result (provably fair)
+    # Provably fair roll
     result_color = generate_roulette_result()
     color_data = config.ROULETTE["colors"][color]
 
+    won = 0
     if result_color == color:
         won = int(bet * color_data["multiplier"])
         wallet.coins += won
-        win_tx = Transaction(
+        session.add(Transaction(
             user_id=user_id,
             type="roulette_win",
             amount=won,
             balance_after=wallet.coins,
-            description=f"Roulette win ({result_color})"
-        )
-        session.add(win_tx)
-    else:
-        won = 0
+            description=f"Roulette win ({result_color})",
+        ))
 
-    # Log spin
-    spin = SpinResult(
+    session.add(SpinResult(
         user_id=user_id,
         game_type="roulette",
         bet=bet,
         result={"color": result_color},
         multiplier=color_data["multiplier"] if result_color == color else 0,
-        won=won
-    )
-    session.add(spin)
+        won=won,
+    ))
 
-    # Update stats
-    result_user = await session.execute(select(User).where(User.telegram_id == user_id))
-    user = result_user.scalar_one_or_none()
-    if user:
-        user.roulette_spins += 1
+    u = await session.execute(select(User).where(User.telegram_id == user_id))
+    user_row = u.scalar_one_or_none()
+    if user_row:
+        user_row.roulette_spins += 1
         if won > 0:
-            user.total_earned += won
+            user_row.total_earned += won
         else:
-            user.total_spent += bet
+            user_row.total_spent += bet
 
     await session.commit()
 
@@ -350,9 +334,8 @@ async def spin_roulette(session: AsyncSession, user_id: int, bet: int, color: st
         "color_emoji": config.ROULETTE["colors"][result_color]["emoji"],
         "multiplier": color_data["multiplier"] if result_color == color else 0,
         "won": won,
-        "balance": wallet.coins
+        "balance": wallet.coins,
     }
-
 
 def generate_roulette_result():
     """Generate roulette result with proper probabilities."""
