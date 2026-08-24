@@ -311,48 +311,127 @@ async def cmd_admin_done(message: types.Message, bot: Bot):
 
 
 # ============================================================
-# CALLBACKS
+# CALLBACKS - always use cb.from_user.id (NOT message.from_user!
+# that is the BOT's id on callback messages)
 # ============================================================
+
+N = chr(10)
 
 async def cb_menu(cb: CallbackQuery, bot: Bot):
-    await cb.message.edit_text("💎 **GIFT RUSH**\n\nPick an action:",
-                               parse_mode="Markdown", reply_markup=main_kb())
+    await cb.message.edit_text(
+        "💎 **GIFT RUSH**" + N + N + "Pick an action:",
+        parse_mode="Markdown", reply_markup=main_kb(),
+    )
     await cb.answer()
-
 
 async def cb_daily(cb: CallbackQuery, bot: Bot):
-    await cmd_daily(cb.message, bot)
+    from db.engine import async_session
+    from api import claim_daily, get_wallet
+    from sqlalchemy import select
+    from db import User
+    uid = cb.from_user.id
+    async with async_session() as session:
+        success, coins, streak, next_claim = await claim_daily(session, uid)
+        if success:
+            u = await session.execute(
+                select(User).where(User.telegram_id == uid))
+            user = u.scalar_one_or_none()
+            wallet = await get_wallet(session, user.id) if user else None
+            bal = wallet.coins if wallet else 0
+            await cb.message.answer(
+                f"🎁 **Daily Drop claimed!**{N}{N}"
+                + f"💎 +{coins} gems{N}"
+                + f"🔥 Streak: {streak} days{N}"
+                + f"💰 Balance: {bal} gems",
+                parse_mode="Markdown", reply_markup=back_kb())
+        else:
+            await cb.message.answer(
+                f"⏰ Already claimed! Next drop in **{next_claim}**",
+                parse_mode="Markdown", reply_markup=back_kb())
     await cb.answer()
-
 
 async def cb_deposit(cb: CallbackQuery, bot: Bot):
-    await cmd_deposit(cb.message, bot)
+    from db.engine import async_session
+    from api.deposits import get_deposit_info
+    uid = cb.from_user.id
+    async with async_session() as session:
+        info = await get_deposit_info(session, uid)
+    await cb.message.answer(
+        f"💸 **Deposit TON → Gems**{N}{N}"
+        + f"**1.** Send TON to:{N}`{info["address"]}`{N}{N}"
+        + f"**2.** Memo (IMPORTANT!):{N}`{info["memo"]}`{N}{N}"
+        + f"💱 1 TON = **{info["gems_per_ton"]} gems**",
+        parse_mode="Markdown", reply_markup=deposit_kb())
     await cb.answer()
-
 
 async def cb_referral(cb: CallbackQuery, bot: Bot):
-    await cmd_referral(cb.message, bot)
+    from db.engine import async_session
+    from sqlalchemy import select
+    from db import User
+    uid = cb.from_user.id
+    async with async_session() as session:
+        result = await session.execute(
+            select(User).where(User.telegram_id == uid))
+        user = result.scalar_one_or_none()
+        if not user:
+            await cb.message.answer("Send /start first!")
+        else:
+            link = f"https://t.me/{config.BOT_USERNAME}?start=ref_{user.referral_code}"
+            await cb.message.answer(
+                f"👥 **Invite & Earn**{N}{N}"
+                + f"`{link}`{N}{N}"
+                + f"💎 +{config.REFERRAL_BONUS} gems per friend{N}"
+                + f"📊 Total invites: **{user.total_referrals}**",
+                parse_mode="Markdown", reply_markup=back_kb())
     await cb.answer()
-
 
 async def cb_leaderboard(cb: CallbackQuery, bot: Bot):
-    await cmd_leaderboard(cb.message, bot)
+    from db.engine import async_session
+    from api import get_leaderboard
+    async with async_session() as session:
+        board = await get_leaderboard(session, "coins")
+        medals = ["🥇", "🥈", "🥉"]
+        text = "🏆 **Top Collectors**" + N + N
+        for i, e in enumerate(board[:10]):
+            m = medals[i] if i < 3 else f"{i+1}."
+            text += f"{m} **{e['username'] or 'Player'}** — 💎{e['value']}{N}"
+        await cb.message.edit_text(text, parse_mode="Markdown", reply_markup=back_kb())
     await cb.answer()
-
 
 async def cb_stats(cb: CallbackQuery, bot: Bot):
-    await cmd_stats(cb.message, bot)
+    from db.engine import async_session
+    from api import get_user_stats
+    uid = cb.from_user.id
+    async with async_session() as session:
+        s = await get_user_stats(session, uid)
+        if not s:
+            await cb.message.answer("Send /start first!")
+        else:
+            await cb.message.answer(
+                f"📊 **Collector Profile**{N}{N}"
+                + f"💎 Gems: **{s['coins']}**{N}"
+                + f"⭐ Level: **{s['level']}**{N}"
+                + f"📦 Items: **{s['total_items']}**{N}"
+                + f"🎁 Boxes: **{s['cases_opened']}**{N}"
+                + f"🧬 Fusions: **{s['items_bred']}**{N}"
+                + f"🔥 Streak: **{s['daily_streak']} days**{N}"
+                + f"👥 Invites: **{s['total_referrals']}**",
+                parse_mode="Markdown", reply_markup=back_kb())
     await cb.answer()
-
 
 async def cb_inventory(cb: CallbackQuery, bot: Bot):
-    await cmd_inventory(cb.message, bot)
+    await cb.message.answer(
+        "📦 **Your Vault lives in the game!**",
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(
+                text="📦 Open Vault",
+                web_app=WebAppInfo(url=config.WEBAPP_URL + "#inventory")),
+            ],
+            [InlineKeyboardButton(text="← Menu", callback_data="menu")],
+        ]))
     await cb.answer()
 
-
-# ============================================================
-# REGISTER
-# ============================================================
 
 def register_handlers(dp: Dispatcher):
     dp.message.register(cmd_start, CommandStart())
