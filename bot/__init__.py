@@ -18,7 +18,7 @@ def get_main_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text="🎰 Play Casino",
-            url=config.WEBAPP_URL
+            web_app=WebAppInfo(url=config.WEBAPP_URL)
         )],
         [
             InlineKeyboardButton(text="🎁 Daily", callback_data="daily"),
