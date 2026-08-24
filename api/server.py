@@ -538,5 +538,25 @@ async def api_withdrawals_complete(request: Request):
     async with async_session() as session:
         return await complete_withdrawal(session, request_id)
 
+
+@app.get("/api/debug/wallets")
+async def api_debug_wallets():
+    from sqlalchemy import select
+    from db import User, Wallet
+    async with async_session() as session:
+        users = (await session.execute(select(User))).scalars().all()
+        wallets = (await session.execute(select(Wallet))).scalars().all()
+        wmap = {w.user_id: w.coins for w in wallets}
+        return [
+            {
+                "row_id": u.id,
+                "telegram_id": u.telegram_id,
+                "username": u.username,
+                "wallet_row_for_internal": wmap.get(u.id, "MISSING"),
+                "wallet_row_for_telegram": wmap.get(u.telegram_id, "MISSING"),
+            }
+            for u in users
+        ]
+
 # Mount static files
 app.mount("/static", StaticFiles(directory="miniapp/static"), name="static")
