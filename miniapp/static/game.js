@@ -1,12 +1,11 @@
-/* Casino Bot - Mini App Game Logic */
+/* Casino Bot - Game Logic (works in Telegram + browser) */
 
-// Global state
 let userId = null;
 let userCoins = 0;
 let currentBet = 50;
 let spinning = false;
 
-// Initialize Telegram WebApp
+// Get Telegram WebApp context
 const tg = window.Telegram?.WebApp;
 if (tg) {
     tg.ready();
@@ -30,29 +29,36 @@ async function api(endpoint, data = {}) {
 
 // Initialize user
 async function initUser() {
-    const initData = tg?.initData || '';
-    const userData = tg?.initDataUnsafe?.user || {};
+    // Try to get user from Telegram
+    let userData = null;
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        userData = tg.initDataUnsafe.user;
+        userId = userData.id;
+    } else {
+        // Browser test mode - use test user
+        userId = 123456789;
+        userData = { id: userId, username: "test_user", first_name: "Test Player" };
+        console.log("Running in browser test mode");
+    }
 
-    const result = await api('/api/user', {
-        init_data: initData,
-        username: userData.username,
-        first_name: userData.first_name
-    });
+    // Load user from API
+    const result = await api('/api/user', { user_id: userId });
 
     if (result.error) {
-        alert('Failed to load user data');
+        document.getElementById('loading').innerHTML = '<p>Error loading user data</p>';
         return;
     }
 
-    userId = result.id;
-    userCoins = result.coins;
+    userCoins = result.coins || 0;
 
+    // Update UI
     document.getElementById('username').textContent = result.first_name || result.username || 'Player';
     document.getElementById('coins').textContent = userCoins.toLocaleString();
     document.getElementById('profile-username').textContent = result.username || '-';
     document.getElementById('profile-coins').textContent = userCoins.toLocaleString();
-    document.getElementById('profile-items').textContent = result.items;
-    document.getElementById('profile-refcode').textContent = result.referral_code;
+    document.getElementById('profile-items').textContent = result.items || 0;
+    document.getElementById('profile-refcode').textContent = result.referral_code || '-';
+    document.getElementById('profile-level').textContent = result.level || 1;
 
     // Hide loading
     document.getElementById('loading').classList.add('hidden');
@@ -66,8 +72,7 @@ async function claimDaily() {
         userCoins = result.balance;
         document.getElementById('coins').textContent = userCoins.toLocaleString();
         document.getElementById('profile-coins').textContent = userCoins.toLocaleString();
-        document.getElementById('daily-status').textContent = 'CLAIMED ✓';
-        alert(`🎁 Claimed ${result.coins} coins!`);
+        alert(`🎁 Claimed ${result.coins} coins! Streak: ${result.streak} days`);
     } else {
         alert(`⏰ Next daily in: ${result.next_claim}`);
     }
@@ -75,23 +80,15 @@ async function claimDaily() {
 
 // Open case
 async function openCase(caseId) {
-    const result = await api('/api/case/open', {
-        user_id: userId,
-        case_id: caseId
-    });
+    const result = await api('/api/case/open', { user_id: userId, case_id: caseId });
 
     if (result.success) {
         userCoins = result.balance;
         document.getElementById('coins').textContent = userCoins.toLocaleString();
         document.getElementById('profile-coins').textContent = userCoins.toLocaleString();
 
-        // Show case opening modal
         const item = result.item;
-        const icons = {
-            common: '🪙', uncommon: '💍', rare: '💎', epic: '🔮', legendary: '👑'
-        };
-
-        document.getElementById('revealed-item').textContent = icons[item.rarity] || '🎁';
+        document.getElementById('revealed-item').textContent = item.emoji || '🎁';
         document.getElementById('item-name').textContent = item.name;
         document.getElementById('item-rarity').textContent = item.rarity;
         document.getElementById('item-rarity').className = `rarity ${item.rarity}`;
@@ -103,23 +100,19 @@ async function openCase(caseId) {
     }
 }
 
-// Close case modal
 function closeCaseModal() {
     document.getElementById('case-modal').classList.add('hidden');
 }
 
-// Show roulette screen
 function showRoulette() {
     showScreen('roulette');
 }
 
-// Set bet amount
 function setBet(amount) {
     currentBet = amount;
     document.getElementById('current-bet').textContent = amount;
 }
 
-// Spin roulette
 async function spinRoulette(color) {
     if (spinning) return;
     spinning = true;
@@ -127,15 +120,10 @@ async function spinRoulette(color) {
     const wheel = document.getElementById('wheel');
     const resultBox = document.getElementById('roulette-result');
 
-    // Animate wheel
     wheel.style.transform = `rotate(${Math.random() * 360 + 720}deg)`;
     resultBox.classList.add('hidden');
 
-    const result = await api('/api/roulette/spin', {
-        user_id: userId,
-        bet: currentBet,
-        color: color
-    });
+    const result = await api('/api/roulette/spin', { user_id: userId, bet: currentBet, color: color });
 
     setTimeout(() => {
         spinning = false;
@@ -159,7 +147,43 @@ async function spinRoulette(color) {
     }, 500);
 }
 
-// Show screen
+// Slots
+let slotSpinning = false;
+
+async function spinSlots() {
+    if (slotSpinning) return;
+    slotSpinning = true;
+
+    const bet = currentBet;
+    const result = await api('/api/slots/spin', { user_id: userId, bet: bet });
+
+    if (result.success) {
+        userCoins = result.balance;
+        document.getElementById('coins').textContent = userCoins.toLocaleString();
+
+        // Animate slots
+        const slots = ['slot1', 'slot2', 'slot3'];
+        slots.forEach((id, i) => {
+            document.getElementById(id).textContent = result.symbols[i];
+        });
+
+        const resultBox = document.getElementById('slots-result');
+        resultBox.classList.remove('hidden');
+
+        if (result.won > 0) {
+            resultBox.className = 'result-box win';
+            resultBox.textContent = `🎉 You won ${result.won} coins! (${result.symbols.join(' ')})`;
+        } else {
+            resultBox.className = 'result-box lose';
+            resultBox.textContent = `😔 You lost! (${result.symbols.join(' ')})`;
+        }
+    } else {
+        alert(result.message || 'Not enough coins!');
+    }
+
+    slotSpinning = false;
+}
+
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(`${screenId}-screen`).classList.add('active');
@@ -168,7 +192,6 @@ function showScreen(screenId) {
     if (screenId === 'menu') refreshBalance();
 }
 
-// Load inventory
 async function loadInventory() {
     const result = await api('/api/inventory', { user_id: userId });
     const list = document.getElementById('inventory-list');
@@ -176,7 +199,7 @@ async function loadInventory() {
     if (result.items && result.items.length > 0) {
         list.innerHTML = result.items.map(item => `
             <div class="inv-item ${item.rarity}">
-                <div class="item-icon">${getRarityIcon(item.rarity)}</div>
+                <div class="item-icon">${item.emoji || '🎁'}</div>
                 <h4>${item.name}</h4>
                 <p class="item-value">${item.value} coins</p>
             </div>
@@ -186,15 +209,6 @@ async function loadInventory() {
     }
 }
 
-// Get rarity icon
-function getRarityIcon(rarity) {
-    const icons = {
-        common: '🪙', uncommon: '💍', rare: '💎', epic: '🔮', legendary: '👑'
-    };
-    return icons[rarity] || '🎁';
-}
-
-// Refresh balance
 async function refreshBalance() {
     const result = await api('/api/stats', { user_id: userId });
     if (result.coins !== undefined) {
@@ -204,14 +218,11 @@ async function refreshBalance() {
     }
 }
 
-// Share referral
 function shareReferral() {
     const refCode = document.getElementById('profile-refcode').textContent;
-    const link = `https://t.me/${tg?.initDataUnsafe?.user ? 'your_bot_username' : 'bot'}?start=ref_${refCode}`;
+    const link = `https://t.me/${tg?.initDataUnsafe?.user ? 'MyCasinoBotx_bot' : 'MyCasinoBotx_bot'}?start=ref_${refCode}`;
 
-    if (tg?.shareMessage) {
-        tg.shareMessage(link);
-    } else if (navigator.share) {
+    if (navigator.share) {
         navigator.share({ title: 'Join Casino Bot!', url: link });
     } else {
         navigator.clipboard.writeText(link);
@@ -219,5 +230,4 @@ function shareReferral() {
     }
 }
 
-// Init on load
 document.addEventListener('DOMContentLoaded', initUser);

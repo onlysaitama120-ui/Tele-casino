@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """
 Casino Bot - Professional Configuration.
@@ -10,7 +11,7 @@ All game settings, payments, and admin config.
 
 BOT_TOKEN = "8944289947:AAEDO9RcrZWr-KdOFy5ypC7E3H43CUtuRMY"  # Get from @BotFather
 BOT_USERNAME = "MyCasinoBotx_bot"
-WEBAPP_URL = "https://tele-casino.vercel.app"  # Deployed mini app URL
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "https://casino-bot.onrender.com")  # Deployed mini app URL
 ADMIN_IDS = [123456789]  # Your Telegram user ID(s)
 
 # ============================================================
