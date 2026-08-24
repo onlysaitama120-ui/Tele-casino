@@ -53,6 +53,7 @@ class WithdrawRequest(Base):
     username = Column(String, nullable=True)
     item_name = Column(String, nullable=False)
     item_value = Column(Integer, default=0)
+    item_id = Column(Integer, nullable=True)
     status = Column(String, default="pending")
     created_at = Column(DateTime, default=datetime.utcnow)
     resolved_at = Column(DateTime, nullable=True)
@@ -199,6 +200,7 @@ async def request_withdrawal(session: AsyncSession, telegram_id: int, item_id: i
         username=user.username or "",
         item_name=item.item_name,
         item_value=item.value,
+        item_id=item.id,
         status="pending",
         created_at=datetime.utcnow(),
     )
@@ -244,15 +246,13 @@ async def complete_withdrawal(session: AsyncSession, request_id: int):
     wr.status = "done"
     wr.resolved_at = datetime.utcnow()
 
-    it = await session.execute(
-        select(InventoryItem).where(
-            InventoryItem.item_name == wr.item_name,
-            InventoryItem.is_locked == True,
+    if wr.item_id:
+        it = await session.execute(
+            select(InventoryItem).where(InventoryItem.id == wr.item_id)
         )
-    )
-    inv_item = it.scalars().first()
-    if inv_item:
-        await session.delete(inv_item)
+        inv_item = it.scalar_one_or_none()
+        if inv_item:
+            await session.delete(inv_item)
 
     await session.commit()
     return {"success": True}

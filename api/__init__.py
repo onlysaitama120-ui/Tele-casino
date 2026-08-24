@@ -268,6 +268,18 @@ async def spin_roulette(session: AsyncSession, user_id: int, bet: int, color: st
     if color not in config.ROULETTE["colors"]:
         return {"success": False, "message": "Invalid color"}
 
+    try:
+        bet = int(bet)
+    except Exception:
+        return {"success": False, "message": "Invalid bet"}
+    if bet <= 0:
+        return {"success": False, "message": "Invalid bet"}
+    try:
+        bet = int(bet)
+    except Exception:
+        return {"success": False, "message": "Invalid bet"}
+    if bet <= 0:
+        return {"success": False, "message": "Invalid bet"}
     if bet < config.ROULETTE["min_bet"] or bet > config.ROULETTE["max_bet"]:
         return {"success": False, "message": f"Bet must be {config.ROULETTE['min_bet']}-{config.ROULETTE['max_bet']}"}
 
@@ -354,6 +366,18 @@ def generate_roulette_result():
 
 async def spin_slots(session: AsyncSession, user_id: int, bet: int):
     """Spin slots machine."""
+    try:
+        bet = int(bet)
+    except Exception:
+        return {"success": False, "message": "Invalid bet"}
+    if bet <= 0:
+        return {"success": False, "message": "Invalid bet"}
+    try:
+        bet = int(bet)
+    except Exception:
+        return {"success": False, "message": "Invalid bet"}
+    if bet <= 0:
+        return {"success": False, "message": "Invalid bet"}
     if bet < config.SLOTS["min_bet"] or bet > config.SLOTS["max_bet"]:
         return {"success": False, "message": f"Bet must be {config.SLOTS['min_bet']}-{config.SLOTS['max_bet']}"}
 
@@ -503,11 +527,9 @@ async def breed_items(session: AsyncSession, user_id: int, item1_id: int, item2_
         )
         session.add(new_item)
 
-        # Update breed counts
-        item1.breed_count += 1
-        item2.breed_count += 1
-        item1.last_breed = now
-        item2.last_breed = now
+        # SECURITY: consume ingredients (prevents infinite gem printing)
+        await session.delete(item1)
+        await session.delete(item2)
 
         # Log breeding
         breed_log = BreedingLog(
@@ -593,6 +615,20 @@ async def list_item(session: AsyncSession, user_id: int, item_id: int, price: in
     if item.is_locked:
         return {"success": False, "message": "Item is locked"}
 
+    try:
+        price = int(price)
+    except Exception:
+        return {"success": False, "message": "Invalid price"}
+    if price <= 0 or price > 10000000:
+        return {"success": False, "message": "Price must be 1-10,000,000"}
+
+    try:
+        price = int(price)
+    except Exception:
+        return {"success": False, "message": "Invalid price"}
+    if price <= 0 or price > 10000000:
+        return {"success": False, "message": "Price must be 1-10,000,000"}
+
     # Check if already listed
     existing = await session.execute(
         select(MarketplaceListing).where(MarketplaceListing.item_id == item_id)
@@ -623,6 +659,12 @@ async def buy_item(session: AsyncSession, user_id: int, listing_id: int):
 
     if listing.seller_id == user_id:
         return {"success": False, "message": "Cannot buy your own item"}
+
+    if listing.price <= 0:
+        return {"success": False, "message": "Invalid listing"}
+
+    if listing.price <= 0:
+        return {"success": False, "message": "Invalid listing"}
 
     # Check buyer wallet
     buyer_wallet = await get_wallet(session, user_id)

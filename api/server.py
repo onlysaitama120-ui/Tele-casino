@@ -37,6 +37,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---- naive per-user rate limiter (money endpoints) ----
+_RL = {}
+import time as _time
+def _rl(uid, ep, min_gap=1.2):
+    key = (uid, ep)
+    now = _time.time()
+    if now - _RL.get(key, 0) < min_gap:
+        raise HTTPException(status_code=429, detail="Slow down")
+    _RL[key] = now
+
 
 def verify_init_data(init_data: str) -> bool:
     """Verify Telegram Mini App init_data."""
@@ -84,6 +94,10 @@ async def root():
 @app.post("/api/user")
 async def api_user(request: Request):
     data = await request.json()
+    if os.environ.get("STRICT_AUTH") == "1":
+        init_data = data.get("init_data", "")
+        if not init_data or not verify_init_data(init_data):
+            raise HTTPException(status_code=401, detail="Telegram auth required")
     user_id = data.get("user_id")
     user_data = data
 
@@ -182,6 +196,7 @@ async def api_case_open(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
     case_id = data.get("case_id")
+    _rl(user_id, "case")
 
     if not user_id or not case_id:
         raise HTTPException(status_code=400, detail="Missing parameters")
@@ -223,6 +238,7 @@ async def api_roulette_spin(request: Request):
     user_id = data.get("user_id")
     bet = data.get("bet", 50)
     color = data.get("color", "red")
+    _rl(user_id, "roul")
 
     if not user_id:
         raise HTTPException(status_code=400, detail="Missing user_id")
@@ -246,6 +262,7 @@ async def api_slots_spin(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
     bet = data.get("bet", 25)
+    _rl(user_id, "slots")
 
     if not user_id:
         raise HTTPException(status_code=400, detail="Missing user_id")
@@ -386,6 +403,7 @@ async def api_marketplace_buy(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
     listing_id = data.get("listing_id")
+    _rl(user_id, "buy")
 
     if not user_id or not listing_id:
         raise HTTPException(status_code=400, detail="Missing parameters")
@@ -536,6 +554,7 @@ async def api_withdraw(request: Request):
     data = await request.json()
     user_id = data.get("user_id")
     item_id = data.get("item_id")
+    _rl(user_id, "wd", 3.0)
     if not user_id or not item_id:
         raise HTTPException(status_code=400, detail="Missing parameters")
     async with async_session() as session:
@@ -543,7 +562,13 @@ async def api_withdraw(request: Request):
 
 
 @app.get("/api/withdrawals")
-async def api_withdrawals():
+async def api_withdrawals(request: Request):
+    try:
+        admin_id = int(request.query_params.get("admin_id", "0"))
+    except Exception:
+        admin_id = 0
+    if admin_id not in config.ADMIN_IDS:
+        raise HTTPException(status_code=403, detail="Unauthorized")
     async with async_session() as session:
         return {"requests": await list_withdrawals(session)}
 
