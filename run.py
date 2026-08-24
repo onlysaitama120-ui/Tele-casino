@@ -10,6 +10,7 @@ Usage:
 """
 
 import asyncio
+import os
 import sys
 import logging
 from aiogram import Bot, Dispatcher
@@ -41,7 +42,7 @@ async def run_api():
     config_uvicorn = uvicorn.Config(
         app,
         host="0.0.0.0",
-        port=8000,
+        port=int(os.environ.get("PORT", 8000)),
         log_level="info"
     )
     server = uvicorn.Server(config_uvicorn)
