@@ -74,7 +74,7 @@ async def cmd_start(message: types.Message, bot: Bot):
             first_name=message.from_user.first_name,
             referral_code=ref_code,
         )
-        wallet = await get_wallet(session, user.id)
+        wallet = await get_wallet(session, user.telegram_id)
 
     if is_new:
         text = (
@@ -336,7 +336,7 @@ async def cb_daily(cb: CallbackQuery, bot: Bot):
             u = await session.execute(
                 select(User).where(User.telegram_id == uid))
             user = u.scalar_one_or_none()
-            wallet = await get_wallet(session, user.id) if user else None
+            wallet = await get_wallet(session, user.telegram_id) if user else None
             bal = wallet.coins if wallet else 0
             await cb.message.answer(
                 f"🎁 **Daily Drop claimed!**{N}{N}"

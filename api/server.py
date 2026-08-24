@@ -118,7 +118,7 @@ async def api_user(request: Request):
             language_code=user_data.get("language_code"),
             referral_code=data.get("referral_code")
         )
-        wallet = await get_wallet(session, user.id)
+        wallet = await get_wallet(session, user.telegram_id)
 
         return {
             "id": user.telegram_id,
@@ -440,7 +440,7 @@ async def api_admin_balance(request: Request):
         if not user:
             return {"error": "User not found"}
 
-        wallet = await get_wallet(session, user.id)
+        wallet = await get_wallet(session, user.telegram_id)
         return {
             "user": user.username or user.first_name,
             "coins": wallet.coins if wallet else 0
@@ -468,8 +468,8 @@ async def api_admin_give(request: Request):
         if not user:
             return {"error": "User not found"}
 
-        await update_wallet(session, user.id, amount, "admin_grant", f"Admin grant: +{amount}")
-        wallet = await get_wallet(session, user.id)
+        await update_wallet(session, user.telegram_id, amount, "admin_grant", f"Admin grant: +{amount}")
+        wallet = await get_wallet(session, user.telegram_id)
 
         return {"success": True, "new_balance": wallet.coins}
 

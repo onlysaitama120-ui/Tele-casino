@@ -65,12 +65,12 @@ async def get_or_create_user(session: AsyncSession, telegram_id: int, **kwargs):
     await session.flush()
 
     # Create wallet
-    wallet = Wallet(user_id=user.id, coins=config.INITIAL_COINS)
+    wallet = Wallet(user_id=user.telegram_id, coins=config.INITIAL_COINS)
     session.add(wallet)
 
     # Log initial coins
     tx = Transaction(
-        user_id=user.id,
+        user_id=user.telegram_id,
         type="bonus",
         amount=config.INITIAL_COINS,
         balance_after=config.INITIAL_COINS,
@@ -80,7 +80,7 @@ async def get_or_create_user(session: AsyncSession, telegram_id: int, **kwargs):
 
     # Referral bonus
     if referred_by:
-        ref_wallet = await get_wallet(session, ref_user.id)
+        ref_wallet = await get_wallet(session, ref_user.telegram_id)
         if ref_wallet:
             ref_wallet.coins += config.REFERRAL_BONUS
             ref_tx = Transaction(
