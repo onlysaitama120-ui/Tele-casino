@@ -111,3 +111,7 @@ LEADERBOARD = {"top_n": 10}
 
 # compat alias for case engine
 CASES = BOXES
+
+# compat aliases (old engine names)
+INITIAL_COINS = INITIAL_GEMS
+BREEDING = FUSION
