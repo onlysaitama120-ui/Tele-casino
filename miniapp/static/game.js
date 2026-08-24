@@ -31,7 +31,6 @@ async function api(endpoint, data = {}) {
 
 // Initialize user
 async function initUser() {
-try {
     // Try to get user from Telegram
     let userData = null;
     if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
