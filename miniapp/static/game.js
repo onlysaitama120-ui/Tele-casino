@@ -15,7 +15,9 @@ if (tg) {
 // API helper
 async function api(endpoint, data = {}) {
     try {
-        const response = await fetch(endpoint, {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 10000);
+        const response = await fetch(endpoint, { signal: controller.signal,
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -45,8 +47,8 @@ try {
     // Load user from API
     const result = await api('/api/user', { user_id: userId });
 
-    if (result.error) {
-        document.getElementById('loading').innerHTML = '<p>Error loading user data</p>';
+    if (result.error || !result.id) {
+        document.getElementById('loading').innerHTML = '<p style="color:#ff5555;padding:20px">API said: ' + JSON.stringify(result) + '</p>';
         return;
     }
 
