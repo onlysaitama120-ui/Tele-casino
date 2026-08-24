@@ -16,7 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from db.engine import async_session, init_db
 from api import (
     get_or_create_user, get_wallet, update_wallet,
-    claim_daily, open_case, spin_roulette, spin_slots,
+    claim_daily, open_case,
     breed_items, list_item, buy_item,
     get_inventory, get_user_stats, get_achievements,
     get_leaderboard, send_gift
