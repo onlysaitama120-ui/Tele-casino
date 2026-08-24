@@ -18,7 +18,7 @@ def get_main_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text="🎰 Play Casino",
-            web_app=WebAppInfo(url=config.WEBAPP_URL)
+            url=config.WEBAPP_URL
         )],
         [
             InlineKeyboardButton(text="🎁 Daily", callback_data="daily"),
@@ -108,7 +108,7 @@ async def cmd_play(message: types.Message, bot: Bot):
     await message.answer(
         "🎮 **Opening Casino...**\n\nTap the button below!",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="🎰 Open Casino", web_app=WebAppInfo(url=config.WEBAPP_URL))]
+            [InlineKeyboardButton(text="🎰 Open Casino", url=config.WEBAPP_URL)]
         ]),
         parse_mode="Markdown"
     )
