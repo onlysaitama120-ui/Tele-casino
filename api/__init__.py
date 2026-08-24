@@ -265,6 +265,11 @@ def roll_case_item(case):
 
 async def spin_roulette(session: AsyncSession, user_id: int, bet: int, color: str):
     """Spin roulette with provably fair system."""
+    try:
+        return await _spin_roulette_inner(session, user_id, bet, color)
+    except Exception as e:
+        import traceback
+        return {"success": False, "debug": traceback.format_exc()[-600:]}
     if color not in config.ROULETTE["colors"]:
         return {"success": False, "message": "Invalid color"}
 
