@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Casino Bot</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <div class="header">
+            <div class="user-info">
+                <span id="username">Loading...</span>
+                <span class="coin-balance">💰 <span id="coins">0</span></span>
+            </div>
+        </div>
+
+        <!-- Main Menu -->
+        <div id="menu-screen" class="screen active">
+            <h1 class="title">🎰 Casino</h1>
+
+            <!-- Daily Reward -->
+            <div id="daily-section" class="card" onclick="claimDaily()">
+                <div class="card-icon">🎁</div>
+                <div class="card-info">
+                    <h3>Daily Reward</h3>
+                    <p>Get <strong>100 coins</strong> free!</p>
+                </div>
+                <div class="card-action" id="daily-status">CLAIM</div>
+            </div>
+
+            <!-- Cases -->
+            <h2 class="section-title">📦 Cases</h2>
+            <div class="cases-grid">
+                <div class="case-card" onclick="openCase('common')">
+                    <div class="case-icon">📦</div>
+                    <h3>Common</h3>
+                    <p>100 coins</p>
+                </div>
+                <div class="case-card" onclick="openCase('rare')">
+                    <div class="case-icon">💎</div>
+                    <h3>Rare</h3>
+                    <p>500 coins</p>
+                </div>
+                <div class="case-card" onclick="openCase('legendary')">
+                    <div class="case-icon">👑</div>
+                    <h3>Legendary</h3>
+                    <p>2000 coins</p>
+                </div>
+            </div>
+
+            <!-- Roulette -->
+            <h2 class="section-title">🎡 Roulette</h2>
+            <div class="card" onclick="showRoulette()">
+                <div class="card-icon">🎯</div>
+                <div class="card-info">
+                    <h3>Roulette</h3>
+                    <p>Bet and multiply your coins!</p>
+                </div>
+                <div class="card-action">PLAY</div>
+            </div>
+
+            <!-- Bottom Nav -->
+            <div class="bottom-nav">
+                <button class="nav-btn active" onclick="showScreen('menu')">🏠 Home</button>
+                <button class="nav-btn" onclick="showScreen('inventory')">📦 Inventory</button>
+                <button class="nav-btn" onclick="showScreen('profile')">👤 Profile</button>
+            </div>
+        </div>
+
+        <!-- Roulette Screen -->
+        <div id="roulette-screen" class="screen">
+            <div class="back-btn" onclick="showScreen('menu')">← Back</div>
+            <h1 class="title">🎡 Roulette</h1>
+
+            <div class="roulette-wheel">
+                <div class="wheel" id="wheel">●</div>
+            </div>
+
+            <div class="bet-section">
+                <label>Bet Amount:</label>
+                <div class="bet-buttons">
+                    <button onclick="setBet(50)">50</button>
+                    <button onclick="setBet(100)">100</button>
+                    <button onclick="setBet(500)">500</button>
+                    <button onclick="setBet(1000)">1000</button>
+                </div>
+                <div class="current-bet">Bet: <span id="current-bet">50</span></div>
+            </div>
+
+            <div class="color-buttons">
+                <button class="color-btn red" onclick="spinRoulette('red')">🔴 Red (2x)</button>
+                <button class="color-btn black" onclick="spinRoulette('black')">⚫ Black (2x)</button>
+                <button class="color-btn green" onclick="spinRoulette('green')">🟢 Green (10x)</button>
+            </div>
+
+            <div id="roulette-result" class="result-box hidden"></div>
+        </div>
+
+        <!-- Inventory Screen -->
+        <div id="inventory-screen" class="screen">
+            <div class="back-btn" onclick="showScreen('menu')">← Back</div>
+            <h1 class="title">📦 Inventory</h1>
+            <div id="inventory-list" class="inventory-grid"></div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div id="profile-screen" class="screen">
+            <div class="back-btn" onclick="showScreen('menu')">← Back</div>
+            <h1 class="title">👤 Profile</h1>
+            <div class="profile-card">
+                <p><strong>Username:</strong> <span id="profile-username">-</span></p>
+                <p><strong>Coins:</strong> 💰 <span id="profile-coins">0</span></p>
+                <p><strong>Items:</strong> 📦 <span id="profile-items">0</span></p>
+                <p><strong>Referral Code:</strong> <span id="profile-refcode">-</span></p>
+                <button class="share-btn" onclick="shareReferral()">📤 Share Referral Link</button>
+            </div>
+        </div>
+
+        <!-- Case Opening Modal -->
+        <div id="case-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="case-opening-animation">
+                    <div class="item-reveal" id="revealed-item"></div>
+                </div>
+                <h2 id="item-name">-</h2>
+                <p id="item-rarity" class="rarity">-</p>
+                <p id="item-value">Value: 0</p>
+                <button class="close-btn" onclick="closeCaseModal()">Collect</button>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/static/game.js"></script>
+</body>
+</html>
