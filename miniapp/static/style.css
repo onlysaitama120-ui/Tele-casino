@@ -333,3 +333,18 @@ button, .case-card, .game-tile, .inv-item, .daily-strip, .pill-btn, .lb-row {
   .slot-cabinet { padding:12px; }
   .reel { width:64px; height:64px; font-size:34px; }
 }
+
+
+/* ---------- deposit banner ---------- */
+.deposit-banner {
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(135deg,rgba(124,92,255,.18),rgba(56,189,248,.09));
+  border:1px solid rgba(124,92,255,.45); border-radius:18px;
+  padding:14px 16px; cursor:pointer; margin-bottom:12px;
+  transition:transform .15s;
+}
+.deposit-banner:active { transform:scale(.98); }
+.claim-btn.dep {
+  background:linear-gradient(135deg,#7c5cff,#38bdf8);
+  color:#fff; flex:none;
+}
