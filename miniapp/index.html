@@ -4,141 +4,230 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Casino Bot</title>
-    <link rel="stylesheet" href="/static/style.css?v=2">
+    <link rel="stylesheet" href="/static/style.css?v=3">
 </head>
 <body>
     <div id="app">
-        <!-- Header -->
+
+        <!-- ======== HEADER ======== -->
         <div class="header">
-            <div class="user-info">
+            <div class="avatar" id="user-avatar">P</div>
+            <div class="user-block">
                 <span id="username">Loading...</span>
-                <span class="coin-balance">💰 <span id="coins">0</span></span>
+                <span class="level-tag">LV <b id="user-level">1</b></span>
+            </div>
+            <div class="coin-pill">
+                <span class="coin-ico">🪙</span>
+                <span id="coins">0</span>
             </div>
         </div>
 
-        <!-- Main Menu -->
+        <!-- XP bar -->
+        <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+
+        <!-- ======== MENU SCREEN ======== -->
         <div id="menu-screen" class="screen active">
-            <h1 class="title">🎰 Casino</h1>
 
-            <!-- Daily Reward -->
-            <div id="daily-section" class="card" onclick="claimDaily()">
-                <div class="card-icon">🎁</div>
-                <div class="card-info">
-                    <h3>Daily Reward</h3>
-                    <p>Get <strong>100 coins</strong> free!</p>
+            <!-- Daily bonus strip -->
+            <div class="daily-strip" onclick="claimDaily()">
+                <div class="ds-left">
+                    <span class="ds-icon">🎁</span>
+                    <div>
+                        <b>Daily Reward</b>
+                        <small id="daily-sub">Claim your free coins</small>
+                    </div>
                 </div>
-                <div class="card-action" id="daily-status">CLAIM</div>
+                <span class="claim-btn" id="daily-status">CLAIM</span>
             </div>
 
-            <!-- Cases -->
-            <h2 class="section-title">📦 Cases</h2>
-            <div class="cases-grid">
-                <div class="case-card" onclick="openCase('common')">
-                    <div class="case-icon">📦</div>
-                    <h3>Common</h3>
-                    <p>100 coins</p>
+            <!-- Streak flame -->
+            <div class="streak-row">
+                <span>🔥 Streak: <b id="streak-days">0</b> days</span>
+                <span>👥 Refs: <b id="ref-count">0</b></span>
+            </div>
+
+            <h2 class="sec-title">📦 Cases</h2>
+            <div class="cases-grid" id="cases-grid"></div>
+
+            <h2 class="sec-title">🎮 Games</h2>
+            <div class="games-grid">
+                <div class="game-tile roulette-tile" onclick="showScreen('roulette')">
+                    <span class="gt-icon">🎡</span><b>Roulette</b><small>Up to 14x</small>
                 </div>
-                <div class="case-card" onclick="openCase('rare')">
-                    <div class="case-icon">💎</div>
-                    <h3>Rare</h3>
-                    <p>500 coins</p>
+                <div class="game-tile slots-tile" onclick="showScreen('slots')">
+                    <span class="gt-icon">🎰</span><b>Slots</b><small>Jackpot 100x</small>
                 </div>
-                <div class="case-card" onclick="openCase('legendary')">
-                    <div class="case-icon">👑</div>
-                    <h3>Legendary</h3>
-                    <p>2000 coins</p>
+                <div class="game-tile breed-tile" onclick="showScreen('breed')">
+                    <span class="gt-icon">🧬</span><b>Breed</b><small>Fuse items</small>
+                </div>
+                <div class="game-tile market-tile" onclick="showScreen('market')">
+                    <span class="gt-icon">🛒</span><b>Market</b><small>Trade items</small>
                 </div>
             </div>
 
-            <!-- Roulette -->
-            <h2 class="section-title">🎡 Roulette</h2>
-            <div class="card" onclick="showRoulette()">
-                <div class="card-icon">🎯</div>
-                <div class="card-info">
-                    <h3>Roulette</h3>
-                    <p>Bet and multiply your coins!</p>
-                </div>
-                <div class="card-action">PLAY</div>
-            </div>
-
-            <!-- Bottom Nav -->
-            <div class="bottom-nav">
-                <button class="nav-btn active" onclick="showScreen('menu')">🏠 Home</button>
-                <button class="nav-btn" onclick="showScreen('inventory')">📦 Inventory</button>
-                <button class="nav-btn" onclick="showScreen('profile')">👤 Profile</button>
+            <h2 class="sec-title">🏆 Ranking</h2>
+            <div class="duo-row">
+                <button class="pill-btn" onclick="showScreen('leaderboard')">🏆 Leaderboard</button>
+                <button class="pill-btn" onclick="showScreen('achievements')">🏅 Achievements</button>
             </div>
         </div>
 
-        <!-- Roulette Screen -->
+        <!-- ======== ROULETTE ======== -->
         <div id="roulette-screen" class="screen">
-            <div class="back-btn" onclick="showScreen('menu')">← Back</div>
+            <div class="top-back" onclick="showScreen('menu')">← Casino</div>
             <h1 class="title">🎡 Roulette</h1>
 
-            <div class="roulette-wheel">
-                <div class="wheel" id="wheel">●</div>
-            </div>
-
-            <div class="bet-section">
-                <label>Bet Amount:</label>
-                <div class="bet-buttons">
-                    <button onclick="setBet(50)">50</button>
-                    <button onclick="setBet(100)">100</button>
-                    <button onclick="setBet(500)">500</button>
-                    <button onclick="setBet(1000)">1000</button>
-                </div>
-                <div class="current-bet">Bet: <span id="current-bet">50</span></div>
-            </div>
-
-            <div class="color-buttons">
-                <button class="color-btn red" onclick="spinRoulette('red')">🔴 Red (2x)</button>
-                <button class="color-btn black" onclick="spinRoulette('black')">⚫ Black (2x)</button>
-                <button class="color-btn green" onclick="spinRoulette('green')">🟢 Green (10x)</button>
+            <div class="wheel-wrap">
+                <div class="wheel-glow"></div>
+                <div class="wheel" id="wheel">🎡</div>
             </div>
 
             <div id="roulette-result" class="result-box hidden"></div>
-        </div>
 
-        <!-- Inventory Screen -->
-        <div id="inventory-screen" class="screen">
-            <div class="back-btn" onclick="showScreen('menu')">← Back</div>
-            <h1 class="title">📦 Inventory</h1>
-            <div id="inventory-list" class="inventory-grid"></div>
-        </div>
+            <div class="bet-chips">
+                <button data-bet="50" onclick="setBet(50)">50</button>
+                <button data-bet="100" onclick="setBet(100)">100</button>
+                <button data-bet="500" onclick="setBet(500)">500</button>
+                <button data-bet="2000" onclick="setBet(2000)">2K</button>
+                <button data-bet="10000" onclick="setBet(10000)">10K</button>
+            </div>
+            <div class="cur-bet">BET: <span id="current-bet">50</span> 🪙</div>
 
-        <!-- Profile Screen -->
-        <div id="profile-screen" class="screen">
-            <div class="back-btn" onclick="showScreen('menu')">← Back</div>
-            <h1 class="title">👤 Profile</h1>
-            <div class="profile-card">
-                <p><strong>Username:</strong> <span id="profile-username">-</span></p>
-                <p><strong>Coins:</strong> 💰 <span id="profile-coins">0</span></p>
-                <p><strong>Items:</strong> 📦 <span id="profile-items">0</span></p>
-                <p><strong>Referral Code:</strong> <span id="profile-refcode">-</span></p>
-                <button class="share-btn" onclick="shareReferral()">📤 Share Referral Link</button>
+            <div class="color-row">
+                <button class="cb red" onclick="spinRoulette('red')">RED<b>2x</b></button>
+                <button class="cb black" onclick="spinRoulette('black')">BLACK<b>2x</b></button>
+                <button class="cb green" onclick="spinRoulette('green')">GREEN<b>14x</b></button>
             </div>
         </div>
 
-        <!-- Case Opening Modal -->
+        <!-- ======== SLOTS ======== -->
+        <div id="slots-screen" class="screen">
+            <div class="top-back" onclick="showScreen('menu')">← Casino</div>
+            <h1 class="title">🎰 Slots</h1>
+
+            <div class="slot-cabinet">
+                <div class="reel" id="slot1">🍒</div>
+                <div class="reel" id="slot2">🍋</div>
+                <div class="reel" id="slot3">🍊</div>
+            </div>
+
+            <div id="slots-result" class="result-box hidden"></div>
+
+            <div class="bet-chips">
+                <button data-bet="25" onclick="setBet(25)">25</button>
+                <button data-bet="100" onclick="setBet(100)">100</button>
+                <button data-bet="500" onclick="setBet(500)">500</button>
+                <button data-bet="2500" onclick="setBet(2500)">2.5K</button>
+            </div>
+            <div class="cur-bet">BET: <span id="slots-current-bet">100</span> 🪙</div>
+
+            <button class="spin-btn" id="slots-spin-btn" onclick="spinSlots()">SPIN</button>
+
+            <div class="paytable">
+                <b>Payouts</b>
+                <span>💎💎💎 = 25x &nbsp; 7️⃣7️⃣7️⃣ = 50x</span>
+                <span>🎰🎰🎰 = 100x JACKPOT</span>
+            </div>
+        </div>
+
+        <!-- ======== BREED ======== -->
+        <div id="breed-screen" class="screen">
+            <div class="top-back" onclick="showScreen('menu')">← Casino</div>
+            <h1 class="title">🧬 Breeding Lab</h1>
+            <p class="hint">Pick two items of the same rarity to fuse them into something better.</p>
+            <div id="breed-slots" class="breed-slots">
+                <div class="breed-slot" id="bslot1" onclick="pickBreedItem(1)">+</div>
+                <div class="breed-plus">➕</div>
+                <div class="breed-slot" id="bslot2" onclick="pickBreedItem(2)">+</div>
+            </div>
+            <button class="spin-btn" id="breed-btn" onclick="doBreed()">FUSE — 500 🪙</button>
+            <div id="breed-result" class="result-box hidden"></div>
+            <h2 class="sec-title">Your breedable items</h2>
+            <div id="breed-list" class="inv-grid"></div>
+        </div>
+
+        <!-- ======== MARKET ======== -->
+        <div id="market-screen" class="screen">
+            <div class="top-back" onclick="showScreen('menu')">← Casino</div>
+            <h1 class="title">🛒 Marketplace</h1>
+            <div id="market-list" class="inv-grid"><p class="empty">Loading listings...</p></div>
+        </div>
+
+        <!-- ======== INVENTORY ======== -->
+        <div id="inventory-screen" class="screen">
+            <div class="top-back" onclick="showScreen('menu')">← Casino</div>
+            <h1 class="title">📦 Inventory</h1>
+            <div id="inv-filter" class="filter-row">
+                <button class="f-btn active" onclick="filterInv('all', this)">ALL</button>
+                <button class="f-btn" onclick="filterInv('rare', this)">RARE+</button>
+                <button class="f-btn" onclick="filterInv('epic', this)">EPIC+</button>
+                <button class="f-btn" onclick="filterInv('legendary', this)">LEGENDARY</button>
+            </div>
+            <div id="inventory-list" class="inv-grid"></div>
+        </div>
+
+        <!-- ======== LEADERBOARD ======== -->
+        <div id="leaderboard-screen" class="screen">
+            <div class="top-back" onclick="showScreen('menu')">← Casino</div>
+            <h1 class="title">🏆 Leaderboard</h1>
+            <div id="lb-list"></div>
+        </div>
+
+        <!-- ======== ACHIEVEMENTS ======== -->
+        <div id="achievements-screen" class="screen">
+            <div class="top-back" onclick="showScreen('menu')">← Casino</div>
+            <h1 class="title">🏅 Achievements</h1>
+            <div id="ach-list"></div>
+        </div>
+
+        <!-- ======== PROFILE ======== -->
+        <div id="profile-screen" class="screen">
+            <div class="top-back" onclick="showScreen('menu')">← Casino</div>
+            <h1 class="title">👤 Profile</h1>
+            <div class="prof-card">
+                <div class="prof-row"><span>User</span><b id="profile-username">-</b></div>
+                <div class="prof-row"><span>Coins</span><b id="profile-coins">0</b></div>
+                <div class="prof-row"><span>Items</span><b id="profile-items">0</b></div>
+                <div class="prof-row"><span>Cases opened</span><b id="profile-cases">0</b></div>
+                <div class="prof-row"><span>Referral code</span><b id="profile-refcode">-</b></div>
+            </div>
+            <button class="share-btn" onclick="shareReferral()">📤 Share Referral Link</button>
+        </div>
+
+        <!-- Bottom nav -->
+        <div class="bottom-nav">
+            <button class="nav-btn active" data-nav="menu" onclick="showScreen('menu')">🏠<span>Home</span></button>
+            <button class="nav-btn" data-nav="inventory" onclick="showScreen('inventory')">📦<span>Bags</span></button>
+            <button class="nav-btn" data-nav="leaderboard" onclick="showScreen('leaderboard')">🏆<span>Top</span></button>
+            <button class="nav-btn" data-nav="profile" onclick="showScreen('profile')">👤<span>Me</span></button>
+        </div>
+
+        <!-- Case opening overlay -->
         <div id="case-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="case-opening-animation">
-                    <div class="item-reveal" id="revealed-item"></div>
-                </div>
+            <div class="roll-strip-wrap">
+                <div class="roll-strip" id="roll-strip"></div>
+                <div class="roll-marker"></div>
+            </div>
+            <div class="reveal-card hidden" id="reveal-card">
+                <div class="reveal-emoji" id="revealed-item">🎁</div>
                 <h2 id="item-name">-</h2>
                 <p id="item-rarity" class="rarity">-</p>
-                <p id="item-value">Value: 0</p>
-                <button class="close-btn" onclick="closeCaseModal()">Collect</button>
+                <p id="item-value" class="val">Value: 0</p>
+                <button class="gold-btn" onclick="closeCaseModal()">COLLECT</button>
             </div>
         </div>
+
+        <!-- Toast -->
+        <div id="toast" class="toast"></div>
 
         <!-- Loading -->
         <div id="loading" class="loading">
             <div class="spinner"></div>
-            <p>Loading...</p>
+            <p>Entering the casino...</p>
         </div>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="/static/game.js?v=2"></script>
+    <script src="/static/game.js?v=4"></script>
 </body>
 </html>
