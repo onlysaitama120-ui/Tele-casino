@@ -76,27 +76,27 @@ async def cmd_start(message: types.Message, bot: Bot):
 
     if is_new:
         text = (
-            f"🎰 **Welcome to Casino Bot!** 🎰/n/n"
-            f"Hey {message.from_user.first_name}! 👋/n/n"
-            f"🎁 You received **{config.INITIAL_COINS} coins** to start!/n/n"
-            f"**🎮 Games Available:**/n"
-            f"📦 Case Opening - Win rare NFT items/n"
-            f"🎡 Roulette - Multiply your coins/n"
-            f"🎰 Slots - Jackpot wins/n"
-            f"🧬 Breeding - Create new items/n"
-            f"🛒 Marketplace - Trade with others/n/n"
-            f"**💰 Earn More:**/n"
-            f"🎁 Claim daily rewards/n"
-            f"👥 Invite friends for bonuses/n"
-            f"🏆 Climb the leaderboards/n/n"
+            f"🎰 **Welcome to Casino Bot!** 🎰\n\n"
+            f"Hey {message.from_user.first_name}! 👋\n\n"
+            f"🎁 You received **{config.INITIAL_COINS} coins** to start!\n\n"
+            f"**🎮 Games Available:**\n"
+            f"📦 Case Opening - Win rare NFT items\n"
+            f"🎡 Roulette - Multiply your coins\n"
+            f"🎰 Slots - Jackpot wins\n"
+            f"🧬 Breeding - Create new items\n"
+            f"🛒 Marketplace - Trade with others\n\n"
+            f"**💰 Earn More:**\n"
+            f"🎁 Claim daily rewards\n"
+            f"👥 Invite friends for bonuses\n"
+            f"🏆 Climb the leaderboards\n\n"
             f"Tap **Play Casino** to begin! 🚀"
         )
     else:
         text = (
-            f"👋 Welcome back, **{message.from_user.first_name}**!/n/n"
-            f"💰 Balance: **{wallet.coins if wallet else 0} coins**/n"
-            f"📊 Level: **{user.level}**/n"
-            f"🔥 Daily Streak: **{user.daily_streak}**/n/n"
+            f"👋 Welcome back, **{message.from_user.first_name}**!\n\n"
+            f"💰 Balance: **{wallet.coins if wallet else 0} coins**\n"
+            f"📊 Level: **{user.level}**\n"
+            f"🔥 Daily Streak: **{user.daily_streak}**\n\n"
             f"Tap **Play Casino** to continue playing!"
         )
 
@@ -106,7 +106,7 @@ async def cmd_start(message: types.Message, bot: Bot):
 async def cmd_play(message: types.Message, bot: Bot):
     """Handle /play command."""
     await message.answer(
-        "🎮 **Opening Casino...**/n/nTap the button below!",
+        "🎮 **Opening Casino...**\n\nTap the button below!",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="🎰 Open Casino", web_app=WebAppInfo(url=config.WEBAPP_URL))]
         ]),
@@ -125,17 +125,17 @@ async def cmd_daily(message: types.Message, bot: Bot):
         if success:
             wallet = await get_wallet(session, message.from_user.id)
             await message.answer(
-                f"🎁 **Daily Claimed!**/n/n"
-                f"You received **{coins} coins**!/n"
-                f"🔥 Streak: **{streak} days**/n"
-                f"💰 Balance: **{wallet.coins} coins**/n/n"
+                f"🎁 **Daily Claimed!**\n\n"
+                f"You received **{coins} coins**!\n"
+                f"🔥 Streak: **{streak} days**\n"
+                f"💰 Balance: **{wallet.coins} coins**\n\n"
                 f"Come back tomorrow for more!",
                 parse_mode="Markdown"
             )
         else:
             await message.answer(
-                f"⏰ **Already Claimed!**/n/n"
-                f"Next daily reward in: **{next_claim}**/n/n"
+                f"⏰ **Already Claimed!**\n\n"
+                f"Next daily reward in: **{next_claim}**\n\n"
                 f"See you tomorrow! 🎰",
                 parse_mode="Markdown"
             )
@@ -152,24 +152,24 @@ async def cmd_inventory(message: types.Message, bot: Bot):
 
         if not items:
             await message.answer(
-                "📦 **Your Inventory**/n/n"
+                "📦 **Your Inventory**\n\n"
                 "Empty! Open some cases to get items.",
                 parse_mode="Markdown"
             )
             return
 
-        text = f"📦 **Your Inventory** ({len(items)} items)/n/n"
+        text = f"📦 **Your Inventory** ({len(items)} items)\n\n"
 
         # Show rarity breakdown
         if stats:
             for rarity, count in stats["rarity_counts"].items():
                 if count > 0:
                     emoji = {"common": "🪙", "uncommon": "💍", "rare": "💎", "epic": "🔮", "legendary": "👑", "mythic": "🌋", "divine": "✨"}.get(rarity, "🎁")
-                    text += f"{emoji} {rarity.title()}: {count}/n"
+                    text += f"{emoji} {rarity.title()}: {count}\n"
 
-        text += "/n**Recent Items:**/n"
+        text += "\n**Recent Items:**\n"
         for item in items[:5]:
-            text += f"{item.item_emoji} **{item.item_name}** ({item.rarity}) - {item.value} coins/n"
+            text += f"{item.item_emoji} **{item.item_name}** ({item.rarity}) - {item.value} coins\n"
 
         await message.answer(text, parse_mode="Markdown", reply_markup=get_back_keyboard())
 
@@ -191,17 +191,17 @@ async def cmd_referral(message: types.Message, bot: Bot):
         ref_link = f"https://t.me/{config.BOT_USERNAME}?start=ref_{user.referral_code}"
 
         await message.answer(
-            f"👥 **Referral Program**/n/n"
-            f"Share your link and earn bonuses!/n/n"
-            f"**Your Link:**/n`{ref_link}`/n/n"
-            f"**Rewards:**/n"
-            f"👥 Each referral: **{config.REFERRAL_BONUS} coins**/n"
-            f"💎 If they deposit: **{config.REFERRAL_PREMIUM} coins**/n"
-            f"📊 Total referrals: **{user.total_referrals}**/n"
-            f"💰 Referral earnings: **{user.referral_earnings} coins**/n/n"
-            f"**How it works:**/n"
-            f"1. Share the link/n"
-            f"2. Friends join using your link/n"
+            f"👥 **Referral Program**\n\n"
+            f"Share your link and earn bonuses!\n\n"
+            f"**Your Link:**\n`{ref_link}`\n\n"
+            f"**Rewards:**\n"
+            f"👥 Each referral: **{config.REFERRAL_BONUS} coins**\n"
+            f"💎 If they deposit: **{config.REFERRAL_PREMIUM} coins**\n"
+            f"📊 Total referrals: **{user.total_referrals}**\n"
+            f"💰 Referral earnings: **{user.referral_earnings} coins**\n\n"
+            f"**How it works:**\n"
+            f"1. Share the link\n"
+            f"2. Friends join using your link\n"
             f"3. You both get bonuses! 🎉",
             parse_mode="Markdown",
             reply_markup=get_back_keyboard()
@@ -221,19 +221,19 @@ async def cmd_stats(message: types.Message, bot: Bot):
             return
 
         text = (
-            f"📊 **Your Stats**/n/n"
-            f"💰 **Coins:** {stats['coins']}/n"
-            f"📊 **Level:** {stats['level']} (XP: {stats['xp']}/{stats['xp_to_next']})/n"
-            f"📦 **Items:** {stats['total_items']}/n"
-            f"🔥 **Daily Streak:** {stats['daily_streak']}/n/n"
-            f"**🎮 Games:**/n"
-            f"📦 Cases Opened: {stats['cases_opened']}/n"
-            f"🎡 Roulette Spins: {stats['roulette_spins']}/n"
-            f"🎰 Slots Spins: {stats['slots_spins']}/n"
-            f"🧬 Items Bred: {stats['items_bred']}/n/n"
-            f"**👥 Social:**/n"
-            f"👥 Referrals: {stats['total_referrals']}/n"
-            f"🛒 Active Listings: {stats['active_listings']}/n"
+            f"📊 **Your Stats**\n\n"
+            f"💰 **Coins:** {stats['coins']}\n"
+            f"📊 **Level:** {stats['level']} (XP: {stats['xp']}/{stats['xp_to_next']})\n"
+            f"📦 **Items:** {stats['total_items']}\n"
+            f"🔥 **Daily Streak:** {stats['daily_streak']}\n\n"
+            f"**🎮 Games:**\n"
+            f"📦 Cases Opened: {stats['cases_opened']}\n"
+            f"🎡 Roulette Spins: {stats['roulette_spins']}\n"
+            f"🎰 Slots Spins: {stats['slots_spins']}\n"
+            f"🧬 Items Bred: {stats['items_bred']}\n\n"
+            f"**👥 Social:**\n"
+            f"👥 Referrals: {stats['total_referrals']}\n"
+            f"🛒 Active Listings: {stats['active_listings']}\n"
             f"⭐ VIP: {'Yes' if stats['is_vip'] else 'No'}"
         )
 
@@ -249,18 +249,18 @@ async def cmd_leaderboard(message: types.Message, bot: Bot):
         coins_board = await get_leaderboard(session, "coins")
         items_board = await get_leaderboard(session, "items")
 
-        text = "🏆 **Leaderboard**/n/n"
+        text = "🏆 **Leaderboard**\n\n"
 
-        text += "**💰 Top by Coins:**/n"
+        text += "**💰 Top by Coins:**\n"
         medals = ["🥇", "🥈", "🥉"]
         for i, entry in enumerate(coins_board[:10]):
             medal = medals[i] if i < 3 else f"{i+1}."
-            text += f"{medal} **{entry['username']}** - {entry['value']} coins/n"
+            text += f"{medal} **{entry['username']}** - {entry['value']} coins\n"
 
-        text += "/n**📦 Top by Items:**/n"
+        text += "\n**📦 Top by Items:**\n"
         for i, entry in enumerate(items_board[:10]):
             medal = medals[i] if i < 3 else f"{i+1}."
-            text += f"{medal} **{entry['username']}** - {entry['value']} items/n"
+            text += f"{medal} **{entry['username']}** - {entry['value']} items\n"
 
         await message.answer(text, parse_mode="Markdown", reply_markup=get_back_keyboard())
 
@@ -273,17 +273,17 @@ async def cmd_achievements(message: types.Message, bot: Bot):
     async with async_session() as session:
         achievements = await get_achievements(session, message.from_user.id)
 
-        text = "🏅 **Achievements**/n/n"
+        text = "🏅 **Achievements**\n\n"
 
         if achievements:
-            text += f"Unlocked: {len(achievements)}/{len(ACHIEVEMENTS)}/n/n"
+            text += f"Unlocked: {len(achievements)}/{len(ACHIEVEMENTS)}\n\n"
             for a in achievements:
-                text += f"{a['emoji']} **{a['name']}** - {a['description']}/n"
+                text += f"{a['emoji']} **{a['name']}** - {a['description']}\n"
         else:
-            text += "No achievements yet. Keep playing to unlock them!/n/n"
-            text += "**Available Achievements:**/n"
+            text += "No achievements yet. Keep playing to unlock them!\n\n"
+            text += "**Available Achievements:**\n"
             for aid, adata in list(ACHIEVEMENTS.items())[:5]:
-                text += f"{adata['emoji']} {adata['name']} - {adata['description']}/n"
+                text += f"{adata['emoji']} {adata['name']} - {adata['description']}\n"
 
         await message.answer(text, parse_mode="Markdown", reply_markup=get_back_keyboard())
 
@@ -291,24 +291,24 @@ async def cmd_achievements(message: types.Message, bot: Bot):
 async def cmd_help(message: types.Message, bot: Bot):
     """Handle /help command."""
     text = (
-        "❓ **Help**/n/n"
-        "**Commands:**/n"
-        "/start - Start the bot/n"
-        "/play - Open casino/n"
-        "/daily - Claim daily reward/n"
-        "/inventory - View items/n"
-        "/referral - Get referral link/n"
-        "/stats - Your statistics/n"
-        "/leaderboard - Top players/n"
-        "/achievements - Your achievements/n"
-        "/help - This message/n/n"
-        "**Games:**/n"
-        "📦 **Cases** - Open cases for random items/n"
-        "🎡 **Roulette** - Bet on colors/n"
-        "🎰 **Slots** - Spin the slot machine/n"
-        "🧬 **Breed** - Combine items/n"
-        "🛒 **Market** - Buy/sell items/n/n"
-        "**Support:**/n"
+        "❓ **Help**\n\n"
+        "**Commands:**\n"
+        "/start - Start the bot\n"
+        "/play - Open casino\n"
+        "/daily - Claim daily reward\n"
+        "/inventory - View items\n"
+        "/referral - Get referral link\n"
+        "/stats - Your statistics\n"
+        "/leaderboard - Top players\n"
+        "/achievements - Your achievements\n"
+        "/help - This message\n\n"
+        "**Games:**\n"
+        "📦 **Cases** - Open cases for random items\n"
+        "🎡 **Roulette** - Bet on colors\n"
+        "🎰 **Slots** - Spin the slot machine\n"
+        "🧬 **Breed** - Combine items\n"
+        "🛒 **Market** - Buy/sell items\n\n"
+        "**Support:**\n"
         "Message @your_support_username"
     )
     await message.answer(text, parse_mode="Markdown", reply_markup=get_back_keyboard())
@@ -329,16 +329,16 @@ async def callback_daily(callback: CallbackQuery, bot: Bot):
         if success:
             wallet = await get_wallet(session, callback.from_user.id)
             await callback.message.edit_text(
-                f"🎁 **Daily Claimed!**/n/n"
-                f"You received **{coins} coins**!/n"
-                f"🔥 Streak: **{streak} days**/n"
+                f"🎁 **Daily Claimed!**\n\n"
+                f"You received **{coins} coins**!\n"
+                f"🔥 Streak: **{streak} days**\n"
                 f"💰 Balance: **{wallet.coins} coins**",
                 parse_mode="Markdown",
                 reply_markup=get_back_keyboard()
             )
         else:
             await callback.message.edit_text(
-                f"⏰ **Already Claimed!**/n/n"
+                f"⏰ **Already Claimed!**\n\n"
                 f"Next daily in: **{next_claim}**",
                 parse_mode="Markdown",
                 reply_markup=get_back_keyboard()
@@ -349,7 +349,7 @@ async def callback_daily(callback: CallbackQuery, bot: Bot):
 async def callback_inventory(callback: CallbackQuery, bot: Bot):
     """Handle inventory callback."""
     await callback.message.edit_text(
-        "📦 **Opening Inventory...**/n/nTap the button below!",
+        "📦 **Opening Inventory...**\n\nTap the button below!",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="📦 Open Inventory", web_app=WebAppInfo(url=config.WEBAPP_URL + "#inventory"))],
@@ -362,7 +362,7 @@ async def callback_inventory(callback: CallbackQuery, bot: Bot):
 async def callback_roulette(callback: CallbackQuery, bot: Bot):
     """Handle roulette callback."""
     await callback.message.edit_text(
-        "🎡 **Roulette**/n/nTap to play!",
+        "🎡 **Roulette**\n\nTap to play!",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="🎡 Open Roulette", web_app=WebAppInfo(url=config.WEBAPP_URL + "#roulette"))],
@@ -375,7 +375,7 @@ async def callback_roulette(callback: CallbackQuery, bot: Bot):
 async def callback_slots(callback: CallbackQuery, bot: Bot):
     """Handle slots callback."""
     await callback.message.edit_text(
-        "🎰 **Slots Machine**/n/nTap to play!",
+        "🎰 **Slots Machine**\n\nTap to play!",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="🎰 Open Slots", web_app=WebAppInfo(url=config.WEBAPP_URL + "#slots"))],
@@ -388,7 +388,7 @@ async def callback_slots(callback: CallbackQuery, bot: Bot):
 async def callback_breed(callback: CallbackQuery, bot: Bot):
     """Handle breed callback."""
     await callback.message.edit_text(
-        "🧬 **Breeding System**/n/nCombine items to create new ones!",
+        "🧬 **Breeding System**\n\nCombine items to create new ones!",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="🧬 Open Breeding", web_app=WebAppInfo(url=config.WEBAPP_URL + "#breed"))],
@@ -401,7 +401,7 @@ async def callback_breed(callback: CallbackQuery, bot: Bot):
 async def callback_market(callback: CallbackQuery, bot: Bot):
     """Handle market callback."""
     await callback.message.edit_text(
-        "🛒 **Marketplace**/n/nBuy and sell items!",
+        "🛒 **Marketplace**\n\nBuy and sell items!",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="🛒 Open Market", web_app=WebAppInfo(url=config.WEBAPP_URL + "#market"))],
@@ -424,7 +424,7 @@ async def callback_referral(callback: CallbackQuery, bot: Bot):
         if user:
             ref_link = f"https://t.me/{config.BOT_USERNAME}?start=ref_{user.referral_code}"
             await callback.message.edit_text(
-                f"👥 **Your Referral Link:**/n/n`{ref_link}`/n/n"
+                f"👥 **Your Referral Link:**\n\n`{ref_link}`\n\n"
                 f"Share it and earn **{config.REFERRAL_BONUS} coins** per friend!",
                 parse_mode="Markdown",
                 reply_markup=get_back_keyboard()
@@ -440,11 +440,11 @@ async def callback_leaderboard(callback: CallbackQuery, bot: Bot):
     async with async_session() as session:
         board = await get_leaderboard(session, "coins")
 
-        text = "🏆 **Top Players**/n/n"
+        text = "🏆 **Top Players**\n\n"
         medals = ["🥇", "🥈", "🥉"]
         for i, entry in enumerate(board[:10]):
             medal = medals[i] if i < 3 else f"{i+1}."
-            text += f"{medal} **{entry['username']}** - {entry['value']} coins/n"
+            text += f"{medal} **{entry['username']}** - {entry['value']} coins\n"
 
         await callback.message.edit_text(text, parse_mode="Markdown", reply_markup=get_back_keyboard())
     await callback.answer()
@@ -460,12 +460,12 @@ async def callback_stats(callback: CallbackQuery, bot: Bot):
 
         if stats:
             await callback.message.edit_text(
-                f"📊 **Your Stats**/n/n"
-                f"💰 Coins: {stats['coins']}/n"
-                f"📊 Level: {stats['level']}/n"
-                f"📦 Items: {stats['total_items']}/n"
-                f"📦 Cases: {stats['cases_opened']}/n"
-                f"🎡 Roulette: {stats['roulette_spins']}/n"
+                f"📊 **Your Stats**\n\n"
+                f"💰 Coins: {stats['coins']}\n"
+                f"📊 Level: {stats['level']}\n"
+                f"📦 Items: {stats['total_items']}\n"
+                f"📦 Cases: {stats['cases_opened']}\n"
+                f"🎡 Roulette: {stats['roulette_spins']}\n"
                 f"🎰 Slots: {stats['slots_spins']}",
                 parse_mode="Markdown",
                 reply_markup=get_back_keyboard()
@@ -482,7 +482,7 @@ async def callback_achievements(callback: CallbackQuery, bot: Bot):
 async def callback_menu(callback: CallbackQuery, bot: Bot):
     """Handle menu callback."""
     await callback.message.edit_text(
-        "🎰 **Casino Menu**/n/nChoose a game:",
+        "🎰 **Casino Menu**\n\nChoose a game:",
         parse_mode="Markdown",
         reply_markup=get_main_keyboard()
     )

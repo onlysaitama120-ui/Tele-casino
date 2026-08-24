@@ -45,7 +45,7 @@ def verify_init_data(init_data: str) -> bool:
         data_check = sorted([f"{k}={v[0]}" for k, v in parsed.items() if k != "hash"])
 
         secret_key = hmac.new(b"WebAppData", config.BOT_TOKEN.encode(), hashlib.sha256).digest()
-        computed_hash = hmac.new(secret_key, "/n".join(data_check).encode(), hashlib.sha256).hexdigest()
+        computed_hash = hmac.new(secret_key, "\n".join(data_check).encode(), hashlib.sha256).hexdigest()
 
         return computed_hash == received_hash
     except Exception:

@@ -381,19 +381,19 @@ async def webhook(request: Request):
 
             if is_new:
                 msg = (
-                    f"🎰 *Welcome to Casino Bot!* 🎰/n/n"
-                    f"Hey {from_user.get('first_name', 'Player')}! 👋/n/n"
-                    f"🎁 You received *{INITIAL_COINS} coins* to start!/n/n"
-                    f"*🎮 Games:*/n"
-                    f"📦 Case Opening/n"
-                    f"🎡 Roulette/n"
-                    f"🎰 Slots/n/n"
+                    f"🎰 *Welcome to Casino Bot!* 🎰\n\n"
+                    f"Hey {from_user.get('first_name', 'Player')}! 👋\n\n"
+                    f"🎁 You received *{INITIAL_COINS} coins* to start!\n\n"
+                    f"*🎮 Games:*\n"
+                    f"📦 Case Opening\n"
+                    f"🎡 Roulette\n"
+                    f"🎰 Slots\n\n"
                     f"Tap *Play Casino* to begin! 🚀"
                 )
             else:
                 msg = (
-                    f"👋 Welcome back, *{from_user.get('first_name', 'Player')}*!/n/n"
-                    f"💰 Balance: *{wallet.coins if wallet else 0} coins*/n/n"
+                    f"👋 Welcome back, *{from_user.get('first_name', 'Player')}*!\n\n"
+                    f"💰 Balance: *{wallet.coins if wallet else 0} coins*\n\n"
                     f"Tap *Play Casino* to continue!"
                 )
             await send_message(chat_id, msg, main_keyboard())
@@ -402,9 +402,9 @@ async def webhook(request: Request):
             success, coins, streak, next_claim = claim_daily(db, user_id)
             if success:
                 wallet = get_wallet(db, user_id)
-                await send_message(chat_id, f"🎁 *Daily Claimed!*/n/nYou received *{coins} coins*!/n🔥 Streak: *{streak} days*/n💰 Balance: *{wallet.coins} coins*")
+                await send_message(chat_id, f"🎁 *Daily Claimed!*\n\nYou received *{coins} coins*!\n🔥 Streak: *{streak} days*\n💰 Balance: *{wallet.coins} coins*")
             else:
-                await send_message(chat_id, f"⏰ *Already Claimed!*/n/nNext daily in: *{next_claim}*")
+                await send_message(chat_id, f"⏰ *Already Claimed!*\n\nNext daily in: *{next_claim}*")
 
         elif text.startswith("/stats") or callback_data == "stats":
             user = db.query(User).filter(User.telegram_id == user_id).first()
@@ -412,11 +412,11 @@ async def webhook(request: Request):
             items = db.query(InventoryItem).filter(InventoryItem.user_id == user.id).count() if user else 0
             if user:
                 await send_message(chat_id,
-                    f"📊 *Your Stats*/n/n"
-                    f"💰 Coins: *{wallet.coins if wallet else 0}*/n"
-                    f"📊 Level: *{user.level}*/n"
-                    f"📦 Items: *{items}*/n"
-                    f"📦 Cases: *{user.cases_opened}*/n"
+                    f"📊 *Your Stats*\n\n"
+                    f"💰 Coins: *{wallet.coins if wallet else 0}*\n"
+                    f"📊 Level: *{user.level}*\n"
+                    f"📦 Items: *{items}*\n"
+                    f"📦 Cases: *{user.cases_opened}*\n"
                     f"🎡 Spins: *{user.roulette_spins}*"
                 )
 
@@ -428,11 +428,11 @@ async def webhook(request: Request):
             user = db.query(User).filter(User.telegram_id == user_id).first()
             if user:
                 link = f"https://t.me/{BOT_USERNAME}?start=ref_{user.referral_code}"
-                await send_message(chat_id, f"👥 *Your Referral Link:*/n/n`{link}`/n/nShare and earn *{REFERRAL_BONUS} coins* per friend!")
+                await send_message(chat_id, f"👥 *Your Referral Link:*\n\n`{link}`\n\nShare and earn *{REFERRAL_BONUS} coins* per friend!")
 
         elif text.startswith("/help"):
             await send_message(chat_id,
-                "❓ *Help*/n/n/start - Start/n/daily - Claim reward/n/inventory - Items/n/stats - Stats/n/referral - Referral link/n/help - This message"
+                "❓ *Help*\n\n/start - Start\n/daily - Claim reward\n/inventory - Items\n/stats - Stats\n/referral - Referral link\n/help - This message"
             )
 
     finally:
