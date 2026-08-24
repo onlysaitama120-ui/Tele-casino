@@ -232,51 +232,6 @@ async def api_case_open_bulk(request: Request):
 # ROULETTE
 # ============================================================
 
-@app.post("/api/roulette/spin")
-async def api_roulette_spin(request: Request):
-    data = await request.json()
-    user_id = data.get("user_id")
-    bet = data.get("bet", 50)
-    color = data.get("color", "red")
-    _rl(user_id, "roul")
-
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Missing user_id")
-
-    async with async_session() as session:
-        result = await spin_roulette(session, user_id, bet, color)
-        return result
-
-
-@app.get("/api/roulette/config")
-async def api_roulette_config():
-    return config.ROULETTE
-
-
-# ============================================================
-# SLOTS
-# ============================================================
-
-@app.post("/api/slots/spin")
-async def api_slots_spin(request: Request):
-    data = await request.json()
-    user_id = data.get("user_id")
-    bet = data.get("bet", 25)
-    _rl(user_id, "slots")
-
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Missing user_id")
-
-    async with async_session() as session:
-        result = await spin_slots(session, user_id, bet)
-        return result
-
-
-@app.get("/api/slots/config")
-async def api_slots_config():
-    return config.SLOTS
-
-
 # ============================================================
 # BREEDING
 # ============================================================
