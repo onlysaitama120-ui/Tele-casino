@@ -42,12 +42,12 @@ else:
 
 print()
 print("=== CREATE TEST USER ===")
-u = req("/api/user", {"user_id": 432199, "username": "wheeltest"})
+u = req("/api/user", {"user_id": 555999, "username": "wheeltest"})
 print("gems:", u.get("coins"))
 
 print()
 print("=== SPIN 1 (should be free daily) ===")
-s1 = req("/api/wheel/spin", {"user_id": 432199})
+s1 = req("/api/wheel/spin", {"user_id": 555999})
 if s1.get("success"):
     p = s1["prize"]
     print(f"landed seg {s1['segment']} | used={s1['used']} | prize={p['emoji']} {p['label']} ({p['type']}) | bal={s1['balance']}")
@@ -56,7 +56,7 @@ else:
 
 print()
 print("=== SPIN 2 (gems, no bonus left) ===")
-s2 = req("/api/wheel/spin", {"user_id": 432199})
+s2 = req("/api/wheel/spin", {"user_id": 555999})
 if s2.get("success"):
     p = s2["prize"]
     print(f"landed seg {s2['segment']} | used={s2['used']} | prize={p['emoji']} {p['label']} | bal={s2['balance']}")
@@ -65,5 +65,5 @@ else:
 
 print()
 print("=== STATUS ===")
-st = req("/api/wheel/status", {"user_id": 432199})
+st = req("/api/wheel/status", {"user_id": 555999})
 print(json.dumps(st))

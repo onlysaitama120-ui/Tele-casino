@@ -97,7 +97,18 @@ async def cmd_start(message: types.Message, bot: Bot):
             f"The boxes are waiting... ✨"
         )
 
-    await message.answer(text, reply_markup=main_kb(), parse_mode="Markdown")
+    # banner + caption (falls back to text if photo fails)
+    photo_url = config.WEBAPP_URL + "/static/banner.png?v=1"
+    try:
+        await message.answer_photo(
+            photo=photo_url,
+            caption=text,
+            parse_mode="Markdown",
+            reply_markup=main_kb(),
+        )
+    except Exception:
+        await message.answer(text, reply_markup=main_kb(), 
+parse_mode="Markdown")
 
 
 async def cmd_play(message: types.Message, bot: Bot):
