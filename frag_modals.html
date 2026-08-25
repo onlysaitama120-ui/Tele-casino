@@ -1,0 +1,29 @@
+        <!-- CASE PREVIEW MODAL -->
+        <div id="preview-modal" class="modal hidden">
+            <div class="modal-card preview-card" onclick="event.stopPropagation()">
+                <div class="preview-header">
+                    <span class="preview-emoji" id="preview-emoji">📦</span>
+                    <h2 id="preview-name">-</h2>
+                    <p class="preview-price">💎 <span id="preview-price">0</span></p>
+                </div>
+                <h3 class="sec-title">Possible Rewards</h3>
+                <div class="preview-rewards" id="preview-rewards"></div>
+                <div class="confirm-actions">
+                    <button class="gold-btn" id="preview-open-btn">OPEN CASE</button>
+                    <button class="cancel-btn" onclick="closePreview()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONFIRM MODAL -->
+        <div id="confirm-modal" class="modal hidden">
+            <div class="modal-card confirm-card" onclick="event.stopPropagation()">
+                <div class="confirm-emoji" id="confirm-emoji">📦</div>
+                <h2 id="confirm-text">Open Case?</h2>
+                <p class="hint" id="confirm-sub">-</p>
+                <div class="confirm-actions">
+                    <button class="gold-btn" onclick="executeConfirm()">YES</button>
+                    <button class="cancel-btn" onclick="closeConfirm()">CANCEL</button>
+                </div>
+            </div>
+        </div>

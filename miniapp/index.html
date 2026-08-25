@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <title>GIFT RUSH</title>
-  <link rel="stylesheet" href="/static/style.css?v=8">
+  <link rel="stylesheet" href="/static/style.css?v=9">
 </head>
 <body>
 <div id="app">
@@ -76,7 +76,16 @@
 <div id="market-screen" class="screen">
   <div class="top-back" onclick="showScreen('home')">← Home</div>
   <h1 class="title">🛒 Marketplace</h1>
-  <div class="filter-row" id="market-filters">
+  <div             <div class="search-row">
+                <input class="search-input" id="market-search" placeholder="Search items..." oninput="searchMarket(this.value)">
+                <select class="sort-select" id="market-sort" onchange="sortMarket(this.value)">
+                    <option value="newest">Newest</option>
+                    <option value="cheapest">Lowest Price</option>
+                    <option value="expensive">Highest Price</option>
+                </select>
+            </div>
+
+class="filter-row" id="market-filters">
     <button class="f-btn active" onclick="filterMarket('all',this)">ALL</button>
     <button class="f-btn" onclick="filterMarket('rare',this)">RARE+</button>
     <button class="f-btn" onclick="filterMarket('epic',this)">EPIC+</button>
@@ -239,6 +248,36 @@
 
 <div id="toast" class="toast"></div>
 
+        <!-- CASE PREVIEW MODAL -->
+        <div id="preview-modal" class="modal hidden">
+            <div class="modal-card preview-card" onclick="event.stopPropagation()">
+                <div class="preview-header">
+                    <span class="preview-emoji" id="preview-emoji">📦</span>
+                    <h2 id="preview-name">-</h2>
+                    <p class="preview-price">💎 <span id="preview-price">0</span></p>
+                </div>
+                <h3 class="sec-title">Possible Rewards</h3>
+                <div class="preview-rewards" id="preview-rewards"></div>
+                <div class="confirm-actions">
+                    <button class="gold-btn" id="preview-open-btn">OPEN CASE</button>
+                    <button class="cancel-btn" onclick="closePreview()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONFIRM MODAL -->
+        <div id="confirm-modal" class="modal hidden">
+            <div class="modal-card confirm-card" onclick="event.stopPropagation()">
+                <div class="confirm-emoji" id="confirm-emoji">📦</div>
+                <h2 id="confirm-text">Open Case?</h2>
+                <p class="hint" id="confirm-sub">-</p>
+                <div class="confirm-actions">
+                    <button class="gold-btn" onclick="executeConfirm()">YES</button>
+                    <button class="cancel-btn" onclick="closeConfirm()">CANCEL</button>
+                </div>
+            </div>
+        </div>
+
 <div id="loading" class="loading">
   <div class="spinner"></div>
   <p>Entering GIFT RUSH...</p>
@@ -246,6 +285,6 @@
 
 </div>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="/static/game.js?v=8"></script>
+<script src="/static/game.js?v=9"></script>
 </body>
 </html>
