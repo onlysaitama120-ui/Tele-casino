@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import User, Wallet, Transaction, SpinResult, InventoryItem
-from api.deposits import Base, Column, Integer, DateTime
+from api.deposits import Base, Column, Integer, String, DateTime, Column, Integer, DateTime
 import config
 
 
