@@ -43,6 +43,8 @@ class User(Base):
     # Daily rewards
     last_daily = Column(DateTime, nullable=True)
     daily_streak = Column(Integer, default=0)
+    last_free_spin = Column(DateTime, nullable=True)
+    bonus_spins = Column(Integer, default=0)
 
     # VIP / Level
     level = Column(Integer, default=1)

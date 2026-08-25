@@ -22,6 +22,9 @@ from api import (
     get_leaderboard, send_gift
 )
 import config
+from api.wheel import (
+    spin_wheel, get_wheel_config, get_spin_status, grant_bonus_spins,
+)
 from api.deposits import (
     get_deposit_info, check_deposits,
     request_withdrawal, list_withdrawals, complete_withdrawal,
@@ -557,6 +560,40 @@ async def api_debug_wallets():
             }
             for u in users
         ]
+
+
+# ============================================================
+# GIFT WHEEL
+# ============================================================
+
+@app.get("/api/wheel/config")
+async def api_wheel_config():
+    return await get_wheel_config()
+
+
+@app.post("/api/wheel/status")
+async def api_wheel_status(request: Request):
+    data = await request.json()
+    uid = data.get("user_id")
+    from sqlalchemy import select
+    from db import User
+    async with async_session() as session:
+        u = await session.execute(select(User).where(User.telegram_id == uid))
+        user = u.scalar_one_or_none()
+        if not user:
+            return {"error": "no user"}
+        return get_spin_status(user)
+
+
+@app.post("/api/wheel/spin")
+async def api_wheel_spin(request: Request):
+    data = await request.json()
+    uid = data.get("user_id")
+    if not uid:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+    _rl(uid, "wheel", 3.0)
+    async with async_session() as session:
+        return await spin_wheel(session, uid)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="miniapp/static"), name="static")

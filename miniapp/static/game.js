@@ -62,7 +62,7 @@ async function initUser() {
     ud = { id: userId, username: "demo_player", first_name: "Demo" };
   }
 
-  const result = await api("/api/user", { user_id: userId, username: ud.username || "", first_name: ud.first_name || "" });
+  const result = await api("/api/user", { user_id: userId, username: ud.username || "", first_name: ud.first_name || "", referral_code: window.__refCode || "" });
 
   if (result.error || !result.id) {
     $("loading").innerHTML = "<p style='color:#ff7a7a;padding:20px;text-align:center'>API: " + JSON.stringify(result) + "</p>";
@@ -452,3 +452,123 @@ const CASES_DATA = {
     {name:"Swiss Watch",rarity:"epic",value:20000,emoji:"⌚"},{name:"Plush Pepe (NFT)",rarity:"legendary",value:90000,emoji:"🐸"},
     {name:"Durov Cap (NFT)",rarity:"mythic",value:350000,emoji:"🧢"},{name:"Precious Peach",rarity:"divine",value:1000000,emoji:"🍑"}]}
 };
+
+/* ============ GIFT WHEEL ============ */
+let wheelSpinning = false;
+let WHEEL_SEGS = [];
+
+async function initWheel() {
+  try {
+    const r = await fetch("/api/wheel/config");
+    const data = await r.json();
+    WHEEL_SEGS = data.segments || [];
+    renderWheel();
+    updateWheelStatus();
+  } catch (e) { console.error(e); }
+}
+
+function renderWheel() {
+  const wheel = $("big-wheel");
+  if (!wheel || !WHEEL_SEGS.length) return;
+  const n = WHEEL_SEGS.length;
+  const step = 360 / n;
+  const stops = [];
+  WHEEL_SEGS.forEach((sg, i) => {
+    stops.push(sg.color + ' ' + (i * step) + 'deg ' + ((i + 1) * step) + 'deg');
+  });
+  wheel.style.background = 'conic-gradient(' + stops.join(', ') + ')';
+  WHEEL_SEGS.forEach((sg, i) => {
+    const mid = i * step + step / 2;
+    const el = document.createElement('div');
+    el.className = 'seg-label';
+    el.style.transform = 'rotate(' + (mid - 90) + 'deg) translate(72px) rotate(90deg)';
+    el.textContent = sg.emoji + ' ' + sg.label;
+    if (sg.type === 'gift') el.style.color = '#ffd54a';
+    wheel.appendChild(el);
+  });
+}
+
+async function updateWheelStatus() {
+  const result = await api("/api/wheel/status", { user_id: userId });
+  const st = $("wheel-status");
+  if (!st) return;
+  if (result.error) { st.textContent = ''; return; }
+  let msg = '';
+  if (result.free_available) msg = '/u{1F195} FREE SPIN AVAILABLE!';
+  else if ((result.bonus_spins || 0) > 0) msg = '/u{1F39F} ' + result.bonus_spins + ' bonus spins left';
+  else msg = 'Cost: /u{1F48E}' + result.gem_cost + ' per spin';
+  st.textContent = msg;
+}
+
+async function spinWheel() {
+  if (wheelSpinning || !WHEEL_SEGS.length) return;
+  wheelSpinning = true;
+  const btn = $("wheel-spin-btn");
+  btn.classList.add('spinning');
+  btn.textContent = "/u2026";
+  $("wheel-result").className = "result-box hidden";
+  haptic();
+  const result = await api("/api/wheel/spin", { user_id: userId });
+  if (!result.success) {
+    wheelSpinning = false;
+    btn.classList.remove('spinning');
+    btn.textContent = "SPIN";
+    let m = result.message || 'Spin failed';
+    if (result.debug) m += ' | ' + String(result.debug).slice(-140);
+    toast(m);
+    return;
+  }
+  const n = result.total_segments;
+  const step = 360 / n;
+  const segMid = result.segment * step + step / 2;
+  const wheel = $("big-wheel");
+  wheel.style.transform = 'rotate(' + (360 * 6 - segMid) + 'deg)';
+  setTimeout(() => {
+    wheelSpinning = false;
+    btn.classList.remove('spinning');
+    btn.textContent = "SPIN";
+    setGems(result.balance);
+    updateWheelStatus();
+    const box = $("wheel-result");
+    box.classList.remove("hidden");
+    const p = result.prize;
+    if (p.type === 'gift') {
+      box.className = 'result-box win';
+      box.innerHTML = p.emoji + ' <b>' + p.item_name + '</b> won!<br><small>Added to your vault</small>';
+      haptic('win');
+    } else if (p.type === 'gems') {
+      box.className = 'result-box win';
+      box.textContent = '/u{1F48E} +' + p.value + ' gems!';
+      haptic('win');
+    } else {
+      box.className = 'result-box lose';
+      box.textContent = '/u{1F4A8} So close! Spin again';
+      haptic('lose');
+    }
+  }, 4500);
+}
+
+/* ============ DEEP-LINK PARSER ============ */
+function parseStartParam() {
+  const sp = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param)
+    ? tg.initDataUnsafe.start_param
+    : (new URLSearchParams(location.search).get("startapp") || "");
+  if (!sp) return {};
+  const parts = sp.split('_');
+  const out = { command: parts[0] || '' };
+  parts.forEach(p => {
+    if (p.indexOf('inviteCode') === 0) out.inviteCode = p.slice(10);
+    if (p.indexOf('adSegmentCode') === 0) out.adSegment = p.slice(13);
+  });
+  return out;
+}
+
+const __origInit = initUser;
+initUser = async function () {
+  const sp = parseStartParam();
+  if (sp.inviteCode) window.__refCode = sp.inviteCode;
+  await __origInit();
+  initWheel();
+  if (sp.command === 'openWheelMain' || location.hash === '#wheel') showScreen('wheel');
+};
+

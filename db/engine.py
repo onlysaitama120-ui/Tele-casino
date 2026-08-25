@@ -17,6 +17,18 @@ async def init_db():
     os.makedirs("db", exist_ok=True)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        from sqlalchemy import text
+        migrations = [
+            "ALTER TABLE users ADD COLUMN last_free_spin DATETIME",
+            "ALTER TABLE users ADD COLUMN bonus_spins INTEGER DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN wheel_spins INTEGER DEFAULT 0",
+            "ALTER TABLE withdraw_requests ADD COLUMN item_id INTEGER",
+        ]
+        for stmt in migrations:
+            try:
+                await conn.execute(text(stmt))
+            except Exception:
+                pass  # column already exists
 
 
 async def get_session():

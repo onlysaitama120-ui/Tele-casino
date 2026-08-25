@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>GIFT RUSH</title>
-    <link rel="stylesheet" href="/static/style.css?v=6">
+    <link rel="stylesheet" href="/static/style.css?v=7">
 </head>
 <body>
     <div id="app">
@@ -46,6 +46,16 @@
                 <span class="claim-btn dep">TOP UP</span>
             </div>
 
+
+            <!-- WHEEL HERO -->
+            <div class="wheel-hero" onclick="showScreen('wheel')">
+                <div class="wh-left">
+                    <span class="wh-icon">🎡</span>
+                    <div><b>GIFT WHEEL</b><small>Win Plush Pepe · Durov Cap</small></div>
+                </div>
+                <span class="claim-btn wh-btn">SPIN</span>
+            </div>
+
             <h2 class="sec-title">📦 Mystery Boxes</h2>
             <div class="cases-grid" id="cases-grid"></div>
 
@@ -69,6 +79,31 @@
             <div class="duo-row">
                 <button class="pill-btn" onclick="showScreen('leaderboard')">🏆 Top Collectors</button>
                 <button class="pill-btn" onclick="showScreen('achievements')">🏅 Achievements</button>
+            </div>
+        </div>
+
+
+        <!-- ======== GIFT WHEEL ======== -->
+        <div id="wheel-screen" class="screen">
+            <div class="top-back" onclick="showScreen('menu')">← Game</div>
+            <h1 class="title">🎡 Gift Wheel</h1>
+
+            <div class="wheel-stage">
+                <div class="wheel-pointer">▼</div>
+                <div class="big-wheel" id="big-wheel"></div>
+                <div class="wheel-hub" id="wheel-spin-btn" onclick="spinWheel()">SPIN</div>
+            </div>
+
+            <div id="wheel-status" class="wheel-status"></div>
+            <div id="wheel-result" class="result-box hidden"></div>
+
+            <div class="paytable">
+                <b>🎁 Prize Pool</b>
+                <span>🐸 Plush Pepe — 0.001%</span>
+                <span>🧢 Durov Cap — 0.03%</span>
+                <span>🌹 Eternal Rose — 0.15%</span>
+                <span>💍 Neon Signet — 0.8%</span>
+                <span>💎 up to 300 gems on every spin</span>
             </div>
         </div>
 
@@ -202,6 +237,6 @@
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="/static/game.js?v=6"></script>
+    <script src="/static/game.js?v=7"></script>
 </body>
 </html>
