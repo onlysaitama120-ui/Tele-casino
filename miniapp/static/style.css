@@ -399,3 +399,48 @@ button, .case-card, .game-tile, .inv-item, .daily-strip, .pill-btn, .lb-row {
 .wheel-hub.spinning { pointer-events:none; opacity:.75; }
 
 .wheel-status { text-align:center; color:var(--dim); font-size:13px; margin-top:12px; }
+
+
+/* ============ WHEEL ANIMATIONS ============ */
+.wheel-hub.spinning {
+  animation: hubPulse 1s infinite;
+}
+@keyframes hubPulse {
+  50% { box-shadow: 0 0 0 16px rgba(255,213,74,.12), 0 6px 22px rgba(0,0,0,.55); }
+}
+
+.wheel-pointer.bounce {
+  animation: pBounce .55s ease;
+}
+@keyframes pBounce {
+  30% { transform: translateX(-50%) translateY(-12px) scale(1.25); }
+  60% { transform: translateX(-50%) translateY(3px); }
+}
+
+.big-wheel.settle {
+  animation: settle .5s ease;
+}
+@keyframes settle {
+  0% { filter: brightness(1.4); }
+  100% { filter: brightness(1); }
+}
+
+.confetti {
+  position: fixed;
+  top: -16px;
+  width: 9px;
+  height: 15px;
+  z-index: 900;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: confetti-fall 2.4s ease-in forwards;
+}
+@keyframes confetti-fall {
+  to { transform: translateY(105vh) rotate(720deg); opacity: .75; }
+}
+
+#wheel-result.win { animation: winPop .45s cubic-bezier(.2,1.6,.4,1); }
+@keyframes winPop {
+  0% { transform: scale(.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}

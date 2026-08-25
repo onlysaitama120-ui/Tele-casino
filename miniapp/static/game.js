@@ -535,10 +535,12 @@ async function spinWheel() {
     if (p.type === 'gift') {
       box.className = 'result-box win';
       box.innerHTML = p.emoji + ' <b>' + p.item_name + '</b> won!<br><small>Added to your vault</small>';
+      confetti(90);
       haptic('win');
     } else if (p.type === 'gems') {
       box.className = 'result-box win';
       box.textContent = '/u{1F48E} +' + p.value + ' gems!';
+      if (p.value >= 300) confetti(60);
       haptic('win');
     } else {
       box.className = 'result-box lose';
@@ -572,3 +574,20 @@ initUser = async function () {
   if (sp.command === 'openWheelMain' || location.hash === '#wheel') showScreen('wheel');
 };
 
+
+
+/* ============ CONFETTI ============ */
+function confetti(count) {
+  count = count || 50;
+  const colors = ['#ffd54a', '#7c5cff', '#39d353', '#ff5252', '#38bdf8'];
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div');
+    d.className = 'confetti';
+    d.style.left = (35 + Math.random() * 30) + '%';
+    d.style.background = colors[i % colors.length];
+    d.style.animationDelay = (Math.random() * 0.4) + 's';
+    d.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 2800);
+  }
+}

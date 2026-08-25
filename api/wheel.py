@@ -69,7 +69,7 @@ async def spin_wheel(session: AsyncSession, telegram_id: int):
         return {"success": False, "message": "Send /start first"}
 
     status = get_spin_status(user)
-    w = await session.execute(select(Wallet).where(Wallet.user_id == user.id))
+    w = await session.execute(select(Wallet).where(Wallet.user_id == user.telegram_id))
     wallet = w.scalar_one_or_none()
     if not wallet:
         return {"success": False, "message": "Wallet missing"}
