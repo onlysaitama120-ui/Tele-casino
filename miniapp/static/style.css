@@ -544,3 +544,16 @@ button,.case-card,.game-tile,.inv-item,.daily-strip,.pill-btn,.lb-row,.wheel-her
 .ref-stat b { display: block; font-size: 18px; color: var(--gold); }
 .ref-stat small { font-size: 10px; color: var(--dim); }
 .milestone-list { display: flex; flex-direction: column; gap: 6px; }
+
+
+/* ============ MARKET PROMO ============ */
+.market-promo {
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, rgba(56,189,248,.15), rgba(124,92,255,.1));
+  border: 1px solid rgba(56,189,248,.4); border-radius: 18px;
+  padding: 16px; cursor: pointer; margin-bottom: 10px; transition: transform .12s;
+}
+.market-promo:active { transform: scale(.985); }
+.mp-left { display: flex; gap: 12px; align-items: center; }
+.mp-icon { font-size: 32px; }
+.mp-left small { display: block; color: var(--dim); font-size: 11px; margin-top: 2px; }
