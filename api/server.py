@@ -81,8 +81,13 @@ def extract_user(init_data: str) -> dict:
 
 @app.on_event("startup")
 async def startup():
+    import db, api.deposits, api.wheel
+    from db.engine import init_db
     await init_db()
-
+    from db.engine import async_session
+    from api import seed_marketplace
+    async with async_session() as session:
+        await seed_marketplace(session)
 
 @app.get("/")
 async def root():
@@ -546,6 +551,8 @@ async def api_withdrawals_complete(request: Request):
 @app.get('/api/debug/seed')
 async def api_debug_seed():
     import db, api.deposits, api.wheel
+    from db.engine import init_db
+    await init_db()
     from db.engine import async_session
     from api import seed_marketplace
     async with async_session() as session:
