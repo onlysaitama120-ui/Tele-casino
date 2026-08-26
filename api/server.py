@@ -550,14 +550,17 @@ async def api_withdrawals_complete(request: Request):
 @app.get("/api/debug/wallets")
 @app.get('/api/debug/seed')
 async def api_debug_seed():
-    import db, api.deposits, api.wheel
-    from db.engine import init_db
-    await init_db()
-    from db.engine import async_session
-    from api import seed_marketplace
-    async with async_session() as session:
-        await seed_marketplace(session)
-    return {"status": "seeded"}
+    import traceback, db, api.deposits, api.wheel
+    try:
+        from db.engine import init_db
+        await init_db()
+        from db.engine import async_session
+        from api import seed_marketplace
+        async with async_session() as session:
+            await seed_marketplace(session)
+        return {"status": "seeded"}
+    except Exception as e:
+        return {"error": traceback.format_exc()[-600:]}
 
 
 async def api_debug_wallets():
