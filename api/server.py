@@ -550,15 +550,37 @@ async def api_withdrawals_complete(request: Request):
 @app.get("/api/debug/wallets")
 @app.get('/api/debug/seed')
 async def api_debug_seed():
-    import traceback, db, api.deposits, api.wheel
+    import traceback, random
     try:
-        from db.engine import init_db
+        import db, api.deposits, config
+        from db.engine import init_db, async_session
         await init_db()
-        from db.engine import async_session
-        from api import seed_marketplace
+        from api.deposits import InventoryItem, MarketplaceListing
         async with async_session() as session:
-            await seed_marketplace(session)
-        return {"status": "seeded"}
+            count = 0
+            import sqlalchemy as sa
+            result = await session.execute(sa.select(sa.func.count()).select_from(MarketplaceListing))
+            count = result.scalar() or 0
+            if count > 0:
+                return {"status": f"already seeded ({count} listings)"}
+            all_items = []
+            for case_name, case in config.CASES.items():
+                for item in case.get('items', []):
+                    all_items.append(item)
+            rarity_mult = {'common':1.2,'uncommon':2.5,'rare':5,'epic':15,'legendary':50,'mythic':200,'divine':1000}
+            for _ in range(25):
+                item = random.choice(all_items)
+                base = item.get('value', 100)
+                mult = rarity_mult.get(item.get('rarity','common'), 1)
+                price = max(int(base * mult * random.uniform(0.7, 1.3)), 10)
+                inv = InventoryItem(user_id=0, item_name=item['name'],
+                    item_emoji=item.get('emoji','🎁'), rarity=item.get('rarity','common'),
+                    value=item.get('value', 0))
+                session.add(inv)
+                await session.flush()
+                session.add(MarketplaceListing(item_id=inv.id, seller_id=0, price=price, is_active=True))
+            await session.commit()
+            return {"status": "seeded 25 items"}
     except Exception as e:
         return {"error": traceback.format_exc()[-600:]}
 
