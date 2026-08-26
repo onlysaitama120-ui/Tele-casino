@@ -543,6 +543,16 @@ async def api_withdrawals_complete(request: Request):
 
 
 @app.get("/api/debug/wallets")
+@app.get('/api/debug/seed')
+async def api_debug_seed():
+    import db, api.deposits, api.wheel
+    from db.engine import async_session
+    from api import seed_marketplace
+    async with async_session() as session:
+        await seed_marketplace(session)
+    return {"status": "seeded"}
+
+
 async def api_debug_wallets():
     from sqlalchemy import select
     from db import User, Wallet
