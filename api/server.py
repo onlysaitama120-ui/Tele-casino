@@ -547,7 +547,6 @@ async def api_withdrawals_complete(request: Request):
         return await complete_withdrawal(session, request_id)
 
 
-@app.get("/api/debug/wallets")
 @app.get('/api/debug/seed')
 async def api_debug_seed():
     import traceback, random
@@ -555,7 +554,7 @@ async def api_debug_seed():
         import db, api.deposits, config
         from db.engine import init_db, async_session
         await init_db()
-        from api.deposits import InventoryItem, MarketplaceListing
+        from db import InventoryItem, MarketplaceListing
         async with async_session() as session:
             count = 0
             import sqlalchemy as sa
@@ -585,6 +584,7 @@ async def api_debug_seed():
         return {"error": traceback.format_exc()[-600:]}
 
 
+@app.get('/api/debug/wallets')
 async def api_debug_wallets():
     from sqlalchemy import select
     from db import User, Wallet
