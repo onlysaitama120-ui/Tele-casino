@@ -403,6 +403,51 @@ def get_rarity_emoji(rarity):
 
 
 # ============================================================
+
+async def seed_marketplace(session):
+    """Auto-populate marketplace with 25 demo listings on fresh DB."""
+    import random
+    from sqlalchemy import func
+    try:
+        count = await session.execute(select(func.count()).select_from(MarketplaceListing))
+        if count.scalar() and count.scalar() > 0:
+            return
+    except Exception:
+        pass  # table might not exist yet
+
+    pool = []
+    for case in config.BOXES.values():
+        for item in case.get('items', []):
+            pool.append(item)
+    if not pool:
+        return
+
+    rarity_mult = {
+        "common": 1.2, "uncommon": 2.5, "rare": 5, "epic": 15,
+        "legendary": 50, "mythic": 200, "divine": 1000
+    }
+
+    for _ in range(25):
+        pick = random.choice(pool)
+        val = pick.get('value', 100)
+        m = rarity_mult.get(pick.get('rarity', 'common'), 1)
+        price = max(int(val * m * random.uniform(0.7, 1.3)), 10)
+        inv = InventoryItem(
+            user_id=0,
+            item_name=pick['name'],
+            item_emoji=pick.get('emoji', '🎁'),
+            rarity=pick.get('rarity', 'common'),
+            value=val,
+        )
+        session.add(inv)
+        await session.flush()
+        session.add(MarketplaceListing(
+            item_id=inv.id, seller_id=0,
+            price=price, is_active=True,
+        ))
+    await session.commit()
+    print("[+] Marketplace seeded with 25 demo listings")
+
 # MARKETPLACE
 # ============================================================
 
