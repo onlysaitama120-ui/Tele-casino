@@ -1,4 +1,5 @@
 # 🎰 Casino Bot - Professional Telegram Mini App
+# its a demo project to be turned into nft based game for tele.
 
 A fully-featured casino bot with NFT items, case opening, roulette, slots, breeding, and marketplace.
 
